@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
+
+const MEASURES = [
+  { key: 'weight',  label: 'Body Weight', unit: 'lbs' },
+  { key: 'bodyFat', label: 'Body Fat',    unit: '%'   },
+  { key: 'waist',   label: 'Waist',       unit: 'in'  },
+  { key: 'hips',    label: 'Hips',        unit: 'in'  },
+  { key: 'arms',    label: 'Arms (bicep)',unit: 'in'  },
+  { key: 'thighs',  label: 'Thighs',      unit: 'in'  },
+  { key: 'chest',   label: 'Chest',       unit: 'in'  },
+];
+
+const MeasurementsView = ({ setView, appData, saveMeasurement }) => {
+  const last = appData.measurements?.[appData.measurements.length - 1] || {};
+  const [values, setValues] = useState(() => {
+    const init = {};
+    MEASURES.forEach(m => { init[m.key] = last[m.key] !== undefined ? String(last[m.key]) : ''; });
+    return init;
+  });
+
+  const handleSave = () => {
+    const entry = { date: new Date().toISOString() };
+    let hasAny = false;
+    MEASURES.forEach(m => {
+      const v = parseFloat(values[m.key]);
+      if (!isNaN(v)) { entry[m.key] = v; hasAny = true; }
+    });
+    if (!hasAny) { alert('Please enter at least one measurement'); return; }
+    saveMeasurement(entry);
+    setView('home');
+  };
+
+  return (
+    <div className="app-container">
+      <div className="app-header">
+        <button className="back-button" onClick={() => setView('home')}><ArrowLeft size={20} /></button>
+        <div className="app-title">CHECK-IN</div>
+        <div className="spacer" />
+      </div>
+
+      <div className="app-content">
+        <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>
+          Log your weekly measurements. Skip any you don't want to track.
+        </p>
+
+        {MEASURES.map(m => (
+          <div key={m.key} className="measure-field">
+            <div>
+              <div className="measure-field-label">{m.label}</div>
+              <div className="measure-field-unit">{m.unit}</div>
+            </div>
+            <input
+              className="measure-input"
+              type="number"
+              step="0.1"
+              placeholder="—"
+              value={values[m.key]}
+              onChange={e => setValues(p => ({ ...p, [m.key]: e.target.value }))}
+            />
+          </div>
+        ))}
+
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <button className="primary-button" onClick={handleSave}>SAVE CHECK-IN</button>
+          <button className="secondary-button" onClick={() => setView('home')}>CANCEL</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MeasurementsView;

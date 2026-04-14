@@ -1,0 +1,502 @@
+/* ── Reset ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: #0E0E0E;
+  color: #F0F0F0;
+  line-height: 1.4;
+}
+
+/* ── CSS Variables ── */
+:root {
+  --lime: #C8F135;
+  --lime-dark: #9BBF1A;
+  --ink: #0E0E0E;
+  --surface: #1A1A1A;
+  --surface2: #242424;
+  --surface3: #2E2E2E;
+  --text: #F0F0F0;
+  --text2: #AAAAAA;
+  --danger: #FF5C5C;
+  --warn: #FF9F0A;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+/* ── App Container ── */
+.app-container {
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--text);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+}
+
+.app-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 1px;
+  color: var(--lime);
+  text-align: center;
+}
+
+.app-subtitle {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 2px;
+  text-align: center;
+}
+
+.spacer { width: 36px; }
+
+/* ── Content ── */
+.app-content { padding: 0 20px 32px; }
+
+/* ── Buttons ── */
+.icon-button, .back-button {
+  background: var(--surface2);
+  border: none;
+  color: var(--text);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.icon-button:hover, .back-button:hover { background: var(--surface3); }
+
+.primary-button {
+  width: 100%;
+  padding: 16px;
+  background: var(--lime);
+  color: var(--ink);
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 44px;
+}
+.primary-button:hover { background: var(--lime-dark); }
+
+.secondary-button {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  color: var(--text2);
+  border: 1.5px solid var(--surface3);
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 44px;
+  transition: all 0.15s;
+}
+.secondary-button:hover { border-color: #888; color: var(--text); }
+
+.danger-button {
+  width: 100%;
+  padding: 14px;
+  background: var(--danger);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  min-height: 44px;
+}
+
+/* ── Section title ── */
+.section-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  color: var(--text2);
+  margin-bottom: 12px;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+/* ── HOME SCREEN ── */
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.metric-card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px;
+}
+.metric-val {
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--lime);
+  letter-spacing: 0.5px;
+}
+.metric-label {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.metric-delta-pos { font-size: 11px; color: var(--lime); }
+.metric-delta-neg { font-size: 11px; color: var(--danger); }
+
+.streak-row { display: flex; gap: 6px; margin-bottom: 16px; }
+.streak-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--surface3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: var(--text2);
+}
+.streak-dot.done { background: var(--lime); color: var(--ink); font-weight: 500; }
+
+.home-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+.history-item {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.history-item-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.history-date { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+.history-muscles { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.muscle-tag {
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: var(--lime);
+}
+.delete-history-btn {
+  background: transparent; border: none;
+  color: var(--text2); cursor: pointer;
+  font-size: 18px; padding: 0 0 0 8px;
+  line-height: 1;
+}
+.delete-history-btn:hover { color: var(--danger); }
+
+.welcome-screen { text-align: center; padding: 48px 0; }
+.welcome-title {
+  font-family: var(--font-display);
+  font-size: 36px; letter-spacing: 1px;
+  color: var(--lime); margin-bottom: 16px;
+}
+.welcome-text { font-size: 16px; color: var(--text2); margin-bottom: 12px; }
+.welcome-tip { font-size: 13px; color: var(--surface3); margin-bottom: 32px; }
+
+/* ── WORKOUT SCREEN — flat list ── */
+.workout-strip {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding-bottom: 4px;
+  margin-bottom: 16px; scrollbar-width: none;
+}
+.workout-strip::-webkit-scrollbar { display: none; }
+.strip-chip {
+  background: var(--surface2);
+  border-radius: 8px; padding: 6px 12px;
+  font-size: 12px; white-space: nowrap; flex-shrink: 0;
+}
+.strip-chip.active { background: #1E2A0E; color: var(--lime); }
+.strip-chip-count {
+  font-family: var(--font-display);
+  font-size: 16px; margin-right: 4px;
+}
+.strip-empty { font-size: 12px; color: var(--text2); padding: 6px 0; }
+
+.exercise-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2); border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.exercise-row.worked { background: #1A2A08; }
+.exercise-muscle-tag {
+  display: inline-block; font-size: 10px;
+  color: var(--lime); background: #1E2A0E;
+  border-radius: 4px; padding: 2px 6px; margin-bottom: 3px;
+}
+.exercise-name { font-size: 14px; font-weight: 500; }
+.exercise-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.exercise-controls { display: flex; align-items: center; gap: 8px; }
+.exercise-set-count {
+  font-family: var(--font-display); font-size: 24px;
+  min-width: 32px; text-align: center; color: var(--lime);
+}
+.round-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: none; cursor: pointer; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; font-weight: 300;
+}
+.round-btn.plus { background: var(--lime); color: var(--ink); }
+.round-btn.plus:hover { background: var(--lime-dark); }
+.round-btn.minus { background: var(--surface3); color: var(--text2); }
+.round-btn.minus:hover { background: #3a3a3a; }
+
+.workout-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+
+/* ── MEASUREMENTS SCREEN ── */
+.measure-field {
+  background: var(--surface2); border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.measure-field-label { font-size: 14px; font-weight: 500; }
+.measure-field-unit { font-size: 12px; color: var(--text2); }
+.measure-input {
+  background: var(--surface3); border: 1.5px solid var(--surface3);
+  border-radius: 8px; color: var(--text);
+  font-family: var(--font-body); font-size: 18px; font-weight: 500;
+  width: 90px; padding: 8px 10px; text-align: right; outline: none;
+}
+.measure-input:focus { border-color: var(--lime); }
+
+/* ── PROGRESS SCREEN ── */
+.tab-bar { display: flex; gap: 4px; margin-bottom: 16px; }
+.tab-btn {
+  flex: 1; padding: 10px 4px; text-align: center;
+  font-size: 11px; font-weight: 500; color: var(--text2);
+  background: var(--surface2); border: none; border-radius: 8px;
+  cursor: pointer; font-family: var(--font-body); transition: all 0.15s;
+}
+.tab-btn.active { background: var(--lime); color: var(--ink); }
+
+.body-measure-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--surface2);
+}
+.body-measure-name { font-size: 14px; font-weight: 500; }
+.body-measure-start { font-size: 11px; color: var(--text2); }
+.body-measure-current {
+  font-family: var(--font-display); font-size: 24px;
+  color: var(--lime); text-align: right;
+}
+.body-measure-unit { font-size: 13px; }
+.body-measure-delta { font-size: 12px; }
+.delta-good { color: var(--lime); }
+.delta-warn { color: var(--warn); }
+
+.chart-container { position: relative; width: 100%; height: 200px; margin-bottom: 20px; }
+.chart-label { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+
+.strength-card {
+  background: var(--surface); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.strength-name { font-size: 14px; font-weight: 500; }
+.strength-meta { font-size: 11px; color: var(--text2); }
+.strength-max {
+  font-family: var(--font-display); font-size: 24px;
+  color: var(--lime); text-align: right;
+}
+.strength-delta { font-size: 12px; text-align: right; }
+
+.volume-bar-row { margin-bottom: 12px; }
+.volume-bar-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.volume-bar-label { font-size: 12px; color: var(--text2); }
+.volume-bar-val { font-size: 12px; color: var(--text); font-weight: 500; }
+.volume-bar-track { height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.volume-bar-fill { height: 100%; background: var(--lime); border-radius: 3px; }
+
+/* ── SETTINGS SCREEN ── */
+.settings-section { margin-bottom: 24px; }
+.settings-section-title {
+  font-family: var(--font-display); font-size: 16px;
+  letter-spacing: 0.5px; color: var(--text2); margin-bottom: 12px;
+}
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid var(--surface2);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-name { font-size: 14px; font-weight: 500; }
+.settings-row-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.settings-badge {
+  background: #1E2A0E; color: var(--lime);
+  font-size: 11px; padding: 3px 8px; border-radius: 6px;
+}
+.settings-action-btn {
+  width: 100%; padding: 14px; margin-bottom: 10px;
+  background: transparent; color: var(--text2);
+  border: 1.5px solid var(--surface3); border-radius: 12px;
+  font-family: var(--font-body); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; min-height: 44px;
+}
+.settings-action-btn:hover { border-color: #888; color: var(--text); }
+.settings-action-btn.accent { border-color: var(--lime); color: var(--lime); }
+.settings-action-btn.danger { border-color: var(--danger); color: var(--danger); }
+.settings-footer { text-align: center; font-size: 12px; color: var(--surface3); margin-top: 24px; }
+
+/* ── EXERCISE MANAGEMENT ── */
+.muscle-sel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.muscle-sel-btn {
+  background: var(--surface); border-radius: 12px;
+  padding: 16px; border: 2px solid transparent;
+  cursor: pointer; text-align: left; color: var(--text);
+  transition: all 0.15s;
+}
+.muscle-sel-btn:hover { border-color: var(--lime); }
+.muscle-sel-name {
+  font-family: var(--font-display); font-size: 20px;
+  letter-spacing: 0.5px; color: var(--lime);
+}
+.muscle-sel-stats { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+.ex-mgmt-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2); border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 8px;
+}
+.ex-mgmt-name { font-size: 14px; font-weight: 500; }
+.ex-mgmt-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.ex-mgmt-controls { display: flex; align-items: center; gap: 6px; }
+.order-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1.5px solid var(--surface3); background: var(--surface3);
+  color: var(--text); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; min-height: 32px; min-width: 32px;
+}
+.order-btn:hover:not(:disabled) { border-color: #888; }
+.order-btn:disabled { opacity: 0.25; cursor: default; }
+.ex-del-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1.5px solid var(--surface3); background: transparent;
+  color: var(--text2); cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; min-height: 32px; min-width: 32px;
+}
+.ex-del-btn:hover { border-color: var(--danger); color: var(--danger); }
+.ex-restore-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1.5px solid var(--lime); background: transparent;
+  color: var(--lime); cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 32px; min-width: 32px;
+}
+.hidden-ex-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2); border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 8px; opacity: 0.6;
+}
+.add-ex-form {
+  background: var(--surface2); border-radius: 12px;
+  padding: 14px; margin-bottom: 12px;
+}
+.add-ex-input {
+  width: 100%; background: var(--surface3);
+  border: 1.5px solid var(--surface3); border-radius: 8px;
+  color: var(--text); font-family: var(--font-body);
+  font-size: 15px; padding: 10px 12px; outline: none; margin-bottom: 10px;
+}
+.add-ex-input:focus { border-color: var(--lime); }
+.add-ex-actions { display: flex; gap: 8px; }
+.add-ex-save {
+  flex: 1; padding: 10px; background: var(--lime); color: var(--ink);
+  border: none; border-radius: 8px;
+  font-family: var(--font-display); font-size: 16px; cursor: pointer;
+  min-height: 40px;
+}
+.add-ex-cancel {
+  flex: 1; padding: 10px; background: transparent; color: var(--text2);
+  border: 1.5px solid var(--surface3); border-radius: 8px;
+  font-family: var(--font-body); font-size: 13px; cursor: pointer;
+  min-height: 40px;
+}
+
+/* ── MODALS ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: flex-end;
+  z-index: 50; padding: 0;
+}
+.modal-sheet {
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  padding: 24px 20px 40px; width: 100%; max-width: 480px; margin: 0 auto;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-title {
+  font-family: var(--font-display); font-size: 24px;
+  color: var(--lime); margin-bottom: 4px; letter-spacing: 0.5px;
+}
+.modal-subtitle { font-size: 12px; color: var(--text2); margin-bottom: 20px; }
+.modal-label {
+  font-size: 13px; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.modal-val-row {
+  display: flex; align-items: center;
+  justify-content: center; gap: 24px; margin-bottom: 20px;
+}
+.modal-val {
+  font-family: var(--font-display); font-size: 56px;
+  color: var(--text); text-align: center; min-width: 80px;
+}
+.modal-ctrl-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: none; cursor: pointer; font-size: 28px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 52px; min-width: 52px;
+}
+.modal-ctrl-btn.minus { background: var(--surface3); color: var(--text); }
+.modal-ctrl-btn.plus { background: var(--lime); color: var(--ink); }
+.modal-divider { height: 1px; background: var(--surface3); margin: 16px 0; }
+.modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+
+.confirm-title {
+  font-family: var(--font-display); font-size: 24px;
+  color: var(--text); margin-bottom: 8px;
+}
+.confirm-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text2); }
+.empty-title {
+  font-family: var(--font-display); font-size: 22px;
+  color: var(--text); margin-bottom: 8px; letter-spacing: 0.5px;
+}
+
+/* ── Accessibility ── */
+button:focus { outline: 2px solid var(--lime); outline-offset: 2px; }
+input:focus { outline: none; }
+button { font-family: var(--font-body); min-height: 44px; min-width: 44px; }
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .app-content { padding: 0 16px 32px; }
+  .app-header { padding: 16px 16px 10px; }
+  .modal-val { font-size: 48px; }
+}

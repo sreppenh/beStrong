@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dark background -->
+  <rect width="512" height="512" rx="112" fill="#0E0E0E"/>
+  
+  <!-- Dumbbell bar -->
+  <rect x="156" y="240" width="200" height="32" rx="6" fill="#C8F135"/>
+  
+  <!-- Left outer plate -->
+  <rect x="88" y="192" width="44" height="128" rx="10" fill="#C8F135"/>
+  <!-- Left inner plate -->
+  <rect x="136" y="208" width="24" height="96" rx="6" fill="#9BBF1A"/>
+  
+  <!-- Right inner plate -->
+  <rect x="352" y="208" width="24" height="96" rx="6" fill="#9BBF1A"/>
+  <!-- Right outer plate -->
+  <rect x="380" y="192" width="44" height="128" rx="10" fill="#C8F135"/>
+  
+  <!-- Center grip highlight -->
+  <rect x="220" y="248" width="72" height="16" rx="4" fill="#1A1A1A" opacity="0.4"/>
+  
+  <!-- Upward arrow to suggest progress -->
+  <path d="M256 140 L280 172 H264 V200 H248 V172 H232 Z" fill="#C8F135" opacity="0.85"/>
+</svg>
