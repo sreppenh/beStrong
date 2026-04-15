@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowLeft, Download } from 'lucide-react';
 
 const SettingsView = ({
-  appData, setView, exportToCSV,
+  appData, setView, updateSettings, exportToCSV,
   resetConfirmation, setResetConfirmation, executeReset
 }) => {
   return (
@@ -31,6 +31,25 @@ const SettingsView = ({
               </div>
               <span className="settings-badge">ON</span>
             </div>
+            {appData.settings.weightTracking && (
+              <div className="settings-row">
+                <div>
+                  <div className="settings-row-name">Weight Increment</div>
+                  <div className="settings-row-sub">Weight adjustment per tap (lbs)</div>
+                </div>
+                <div className="increment-buttons">
+                  {[1, 2.5, 5].map(increment => (
+                    <button
+                      key={increment}
+                      onClick={() => updateSettings('weightIncrement', increment)}
+                      className={`increment-button ${appData.settings.weightIncrement === increment ? 'active' : ''}`}
+                    >
+                      {increment === 2.5 ? '2.5' : increment}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="settings-row" style={{ borderBottom: 'none' }}>
               <div>
                 <div className="settings-row-name">Units</div>

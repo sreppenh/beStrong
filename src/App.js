@@ -241,11 +241,15 @@ function App() {
 
   const executeReset = (type) => {
     if (type === 'factory') {
-      setAppData({ workouts: [], measurements: [], settings: { repsTracking: true, weightTracking: true, weightIncrement: 2.5, customExercises: {}, hiddenExercises: {}, exerciseOrder: {} } });
+      setAppData({ workouts: [], measurements: [], settings: { repsTracking: true, weightTracking: true, weightIncrement: 1, customExercises: {}, hiddenExercises: {}, exerciseOrder: {} } });
       setCurrentWorkout({});
       setView('home');
     }
     setResetConfirmation(null);
+  };
+
+  const updateSettings = (key, value) => {
+    setAppData(prev => ({ ...prev, settings: { ...prev.settings, [key]: value } }));
   };
 
   const exportToCSV = () => {
@@ -279,7 +283,7 @@ function App() {
     incrementSet, decrementSet, finishWorkout, confirmAbandonWorkout,
     hasActiveSets, exerciseHasHistory,
     addCustomExercise, removeExercise, moveExerciseUp, moveExerciseDown, restoreDefaultExercise,
-    exportToCSV, executeReset, deleteWorkout, saveMeasurement,
+    updateSettings, exportToCSV, executeReset, deleteWorkout, saveMeasurement,
     repsEntry, setRepsEntry, saveSetWithData,
     abandonConfirmation, setAbandonConfirmation,
     resetConfirmation, setResetConfirmation,

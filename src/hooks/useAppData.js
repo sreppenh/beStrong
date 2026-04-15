@@ -7,7 +7,7 @@ export const useAppData = () => {
     settings: {
       repsTracking: true,
       weightTracking: true,
-      weightIncrement: 2.5,
+      weightIncrement: 1,
       customExercises: {},
       hiddenExercises: {},
       exerciseOrder: {}
