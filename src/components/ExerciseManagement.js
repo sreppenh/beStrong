@@ -105,7 +105,6 @@ const ExerciseManagement = ({
 
         {visible.map((ex, i) => {
           const isDefault = exerciseLibrary[m].includes(ex);
-          const isGeneral = ex.endsWith('General');
           const hasHist = exerciseHasHistory(ex);
           return (
             <div key={ex} className="ex-mgmt-row">
@@ -118,12 +117,10 @@ const ExerciseManagement = ({
               <div className="ex-mgmt-controls">
                 <button className="order-btn" onClick={() => moveExerciseUp(m, ex)} disabled={i === 0}>↑</button>
                 <button className="order-btn" onClick={() => moveExerciseDown(m, ex)} disabled={i === visible.length - 1}>↓</button>
-                {!isGeneral && (
-                  <button className="ex-del-btn" onClick={() => setExerciseManagement(p => ({
-                    ...p,
-                    deleteConfirmation: { exerciseName: ex, muscleGroup: m, hasHistory: hasHist, isDefault }
-                  }))}>×</button>
-                )}
+                <button className="ex-del-btn" onClick={() => setExerciseManagement(p => ({
+                  ...p,
+                  deleteConfirmation: { exerciseName: ex, muscleGroup: m, hasHistory: hasHist, isDefault }
+                }))}>×</button>
               </div>
             </div>
           );
