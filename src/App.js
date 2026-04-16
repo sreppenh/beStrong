@@ -18,6 +18,7 @@ function App() {
   const [repsEntry, setRepsEntry] = useState(null);
   const [abandonConfirmation, setAbandonConfirmation] = useState(false);
   const [resetConfirmation, setResetConfirmation] = useState(null);
+  const [editMeasurementIdx, setEditMeasurementIdx] = useState(null);
   const [exerciseManagement, setExerciseManagement] = useState({
     muscleGroup: null, newExerciseName: '', showAddForm: false, deleteConfirmation: null
   });
@@ -183,6 +184,14 @@ function App() {
     setAppData(prev => ({ ...prev, measurements: [...(prev.measurements || []), entry] }));
   };
 
+  const updateMeasurement = (idx, entry) => {
+    setAppData(prev => {
+      const updated = [...(prev.measurements || [])];
+      updated[idx] = entry;
+      return { ...prev, measurements: updated };
+    });
+  };
+
   const deleteWorkout = (idx) => {
     setAppData(prev => ({ ...prev, workouts: prev.workouts.filter((_, i) => i !== idx) }));
   };
@@ -283,7 +292,8 @@ function App() {
     incrementSet, decrementSet, finishWorkout, confirmAbandonWorkout,
     hasActiveSets, exerciseHasHistory,
     addCustomExercise, removeExercise, moveExerciseUp, moveExerciseDown, restoreDefaultExercise,
-    updateSettings, exportToCSV, executeReset, deleteWorkout, saveMeasurement,
+    updateSettings, exportToCSV, executeReset, deleteWorkout, saveMeasurement, updateMeasurement,
+    editMeasurementIdx, setEditMeasurementIdx,
     repsEntry, setRepsEntry, saveSetWithData,
     abandonConfirmation, setAbandonConfirmation,
     resetConfirmation, setResetConfirmation,

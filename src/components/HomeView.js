@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Pencil } from 'lucide-react';
 import { exerciseLibrary } from '../data/exercises';
 
 const MUSCLE_GROUPS = Object.keys(exerciseLibrary);
 
-const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorkout }) => {
+const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorkout, setEditMeasurementIdx }) => {
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
   const formatDate = (dateStr) => {
@@ -140,6 +140,38 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
           <button className="primary-button" onClick={() => setView('workout')}>START WORKOUT</button>
           <button className="secondary-button" onClick={() => setView('measurements')}>LOG MEASUREMENTS</button>
         </div>
+
+        {/* Recent check-ins */}
+        {appData.measurements?.length > 0 && (
+          <>
+            <div className="section-title">RECENT CHECK-INS</div>
+            <div className="card" style={{ marginBottom: 24 }}>
+              {[...appData.measurements]
+                .map((m, i) => ({ ...m, _idx: i }))
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 3)
+                .map(m => (
+                  <div key={m._idx} className="checkin-row">
+                    <div>
+                      <div className="checkin-date">{formatDate(m.date)}</div>
+                      <div className="checkin-values">
+                        {m.weight != null && <span>{m.weight.toFixed(1)} lbs</span>}
+                        {m.bodyFat != null && <span>{m.bodyFat.toFixed(1)}% bf</span>}
+                        {m.waist != null && <span>{m.waist.toFixed(1)}" waist</span>}
+                      </div>
+                    </div>
+                    <button
+                      className="checkin-edit-btn"
+                      onClick={() => { setEditMeasurementIdx(m._idx); setView('measurements'); }}
+                      title="Edit check-in"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                  </div>
+                ))}
+            </div>
+          </>
+        )}
 
         {/* 7-day totals */}
         {recent.length > 0 && (

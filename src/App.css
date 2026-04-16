@@ -358,6 +358,20 @@ body {
 .settings-action-btn.accent { border-color: var(--lime); color: var(--lime); }
 .settings-action-btn.danger { border-color: var(--danger); color: var(--danger); }
 .settings-footer { text-align: center; font-size: 12px; color: var(--surface3); margin-top: 24px; }
+.checkin-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--surface3);
+}
+.checkin-row:last-child { border-bottom: none; }
+.checkin-date { font-size: 12px; color: var(--text2); margin-bottom: 3px; }
+.checkin-values { display: flex; gap: 10px; font-size: 13px; font-weight: 500; color: var(--text); }
+.checkin-values span { color: var(--text2); }
+.checkin-edit-btn {
+  padding: 6px 8px; background: transparent; border: 1px solid var(--surface3);
+  border-radius: 6px; color: var(--text2); cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center;
+}
+.checkin-edit-btn:hover { border-color: var(--lime); color: var(--lime); }
 .increment-buttons { display: flex; gap: 6px; }
 .increment-button {
   padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
