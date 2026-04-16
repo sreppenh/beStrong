@@ -5,6 +5,7 @@ import MeasurementsView from './components/MeasurementsView';
 import ProgressView from './components/ProgressView';
 import SettingsView from './components/SettingsView';
 import ExerciseManagement from './components/ExerciseManagement';
+import EditWorkoutView from './components/EditWorkoutView';
 import { useAppData } from './hooks/useAppData';
 import { exerciseLibrary } from './data/exercises';
 import './App.css';
@@ -19,6 +20,7 @@ function App() {
   const [abandonConfirmation, setAbandonConfirmation] = useState(false);
   const [resetConfirmation, setResetConfirmation] = useState(null);
   const [editMeasurementIdx, setEditMeasurementIdx] = useState(null);
+  const [editWorkoutIdx, setEditWorkoutIdx] = useState(null);
   const [exerciseManagement, setExerciseManagement] = useState({
     muscleGroup: null, newExerciseName: '', showAddForm: false, deleteConfirmation: null
   });
@@ -196,6 +198,14 @@ function App() {
     setAppData(prev => ({ ...prev, workouts: prev.workouts.filter((_, i) => i !== idx) }));
   };
 
+  const updateWorkout = (idx, workout) => {
+    setAppData(prev => {
+      const updated = [...prev.workouts];
+      updated[idx] = workout;
+      return { ...prev, workouts: updated };
+    });
+  };
+
   const addCustomExercise = (muscle, name) => {
     const trimmed = name.trim();
     if (!trimmed) return false;
@@ -292,8 +302,9 @@ function App() {
     incrementSet, decrementSet, finishWorkout, confirmAbandonWorkout,
     hasActiveSets, exerciseHasHistory,
     addCustomExercise, removeExercise, moveExerciseUp, moveExerciseDown, restoreDefaultExercise,
-    updateSettings, exportToCSV, executeReset, deleteWorkout, saveMeasurement, updateMeasurement,
+    updateSettings, exportToCSV, executeReset, deleteWorkout, updateWorkout, saveMeasurement, updateMeasurement,
     editMeasurementIdx, setEditMeasurementIdx,
+    editWorkoutIdx, setEditWorkoutIdx,
     repsEntry, setRepsEntry, saveSetWithData,
     abandonConfirmation, setAbandonConfirmation,
     resetConfirmation, setResetConfirmation,
@@ -308,6 +319,7 @@ function App() {
     case 'progress':        return <ProgressView {...commonProps} />;
     case 'settings':        return <SettingsView {...commonProps} />;
     case 'exercise-management': return <ExerciseManagement {...commonProps} />;
+    case 'edit-workout':        return <EditWorkoutView {...commonProps} />;
     default:                return <HomeView {...commonProps} />;
   }
 }

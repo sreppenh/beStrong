@@ -4,7 +4,7 @@ import { exerciseLibrary } from '../data/exercises';
 
 const MUSCLE_GROUPS = Object.keys(exerciseLibrary);
 
-const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorkout, setEditMeasurementIdx }) => {
+const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorkout, setEditMeasurementIdx, setEditWorkoutIdx }) => {
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
   const formatDate = (dateStr) => {
@@ -208,7 +208,10 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
                 <div key={wi} className="history-item">
                   <div className="history-item-header">
                     <div className="history-date">{formatDate(w.startTime || w.date)} · {totalSets} sets</div>
-                    <button className="delete-history-btn" onClick={() => setDeleteConfirmation({ idx })} title="Delete workout">×</button>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button className="checkin-edit-btn" onClick={() => { setEditWorkoutIdx(idx); setView('edit-workout'); }} title="Edit workout"><Pencil size={14} /></button>
+                      <button className="delete-history-btn" onClick={() => setDeleteConfirmation({ idx })} title="Delete workout">×</button>
+                    </div>
                   </div>
                   <div className="history-muscles">
                     {muscles.map(m => <span key={m} className="muscle-tag">{capitalizeFirst(m)}</span>)}
