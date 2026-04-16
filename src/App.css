@@ -330,6 +330,29 @@ body {
 .volume-bar-track { height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
 .volume-bar-fill { height: 100%; background: var(--lime); border-radius: 3px; }
 
+/* ── INSIGHTS TAB ── */
+.insight-section { margin-bottom: 28px; }
+.insight-section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--text2);
+  margin-bottom: 10px; margin-top: 4px;
+}
+.insight-placeholder {
+  background: var(--surface); border-radius: 10px; padding: 14px 16px;
+  font-size: 13px; color: var(--text2); border: 1px dashed var(--surface3);
+}
+.insight-card {
+  background: var(--surface); border-radius: 10px; padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.insight-card.compact { padding: 10px 16px; }
+.insight-card-inner { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.insight-headline { font-size: 12px; color: var(--text2); font-weight: 500; }
+.insight-value { font-size: 20px; font-weight: 700; color: var(--lime); white-space: nowrap; }
+.insight-card.compact .insight-value { font-size: 16px; }
+.insight-value.flagged { color: var(--warn); }
+.insight-desc { font-size: 13px; color: var(--text2); margin-top: 6px; line-height: 1.4; }
+.insight-subheader { font-size: 11px; color: var(--text2); margin: 12px 0 6px; letter-spacing: 0.3px; }
+
 /* ── SETTINGS SCREEN ── */
 .settings-section { margin-bottom: 24px; }
 .settings-section-title {
