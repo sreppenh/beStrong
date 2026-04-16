@@ -138,7 +138,8 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
         {/* Actions */}
         <div className="home-actions">
           <button className="primary-button" onClick={() => setView('workout')}>START WORKOUT</button>
-          <button className="secondary-button" onClick={() => setView('measurements')}>LOG MEASUREMENTS</button>
+          <button className="secondary-button" onClick={() => setView('measurements-scale')}>LOG WEIGHT &amp; BODY FAT</button>
+          <button className="secondary-button" onClick={() => setView('measurements-body')}>LOG MEASUREMENTS</button>
         </div>
 
         {/* Recent check-ins */}

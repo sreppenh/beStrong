@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
-const MEASURES = [
+const ALL_MEASURES = [
   { key: 'weight',  label: 'Body Weight', unit: 'lbs' },
   { key: 'bodyFat', label: 'Body Fat',    unit: '%'   },
   { key: 'waist',   label: 'Waist',       unit: 'in'  },
@@ -11,15 +11,23 @@ const MEASURES = [
   { key: 'chest',   label: 'Chest',       unit: 'in'  },
 ];
 
-const MeasurementsView = ({ setView, appData, saveMeasurement, updateMeasurement, editMeasurementIdx, setEditMeasurementIdx }) => {
+const SCALE_KEYS = ['weight', 'bodyFat'];
+const BODY_KEYS  = ['waist', 'hips', 'arms', 'thighs', 'chest'];
+
+const MeasurementsView = ({ setView, appData, saveMeasurement, updateMeasurement, editMeasurementIdx, setEditMeasurementIdx, mode = 'all' }) => {
   const isEditing = editMeasurementIdx !== null && editMeasurementIdx !== undefined;
   const source = isEditing
     ? (appData.measurements?.[editMeasurementIdx] || {})
     : (appData.measurements?.[appData.measurements.length - 1] || {});
 
+  const activeKeys = isEditing || mode === 'all' ? null
+    : mode === 'scale' ? SCALE_KEYS
+    : BODY_KEYS;
+  const MEASURES = activeKeys ? ALL_MEASURES.filter(m => activeKeys.includes(m.key)) : ALL_MEASURES;
+
   const [values, setValues] = useState(() => {
     const init = {};
-    MEASURES.forEach(m => { init[m.key] = source[m.key] !== undefined ? String(source[m.key]) : ''; });
+    ALL_MEASURES.forEach(m => { init[m.key] = source[m.key] !== undefined ? String(source[m.key]) : ''; });
     return init;
   });
 
@@ -56,7 +64,7 @@ const MeasurementsView = ({ setView, appData, saveMeasurement, updateMeasurement
     <div className="app-container">
       <div className="app-header">
         <button className="back-button" onClick={handleBack}><ArrowLeft size={20} /></button>
-        <div className="app-title">CHECK-IN</div>
+        <div className="app-title">{mode === 'scale' ? 'WEIGHT & BODY FAT' : mode === 'body' ? 'MEASUREMENTS' : 'CHECK-IN'}</div>
         <div className="spacer" />
       </div>
 
@@ -67,7 +75,7 @@ const MeasurementsView = ({ setView, appData, saveMeasurement, updateMeasurement
           </p>
         ) : (
           <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>
-            Log your weekly measurements. Skip any you don't want to track.
+            {mode === 'scale' ? 'Log your weight and body fat.' : 'Log your body measurements. Skip any you don\'t want to track.'}
           </p>
         )}
 

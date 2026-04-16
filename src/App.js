@@ -315,7 +315,9 @@ function App() {
 
   switch (view) {
     case 'workout':         return <WorkoutView {...commonProps} />;
-    case 'measurements':    return <MeasurementsView {...commonProps} />;
+    case 'measurements':        return <MeasurementsView {...commonProps} mode="all" />;
+    case 'measurements-scale':  return <MeasurementsView {...commonProps} mode="scale" />;
+    case 'measurements-body':   return <MeasurementsView {...commonProps} mode="body" />;
     case 'progress':        return <ProgressView {...commonProps} />;
     case 'settings':        return <SettingsView {...commonProps} />;
     case 'exercise-management': return <ExerciseManagement {...commonProps} />;
