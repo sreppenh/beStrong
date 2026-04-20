@@ -129,11 +129,37 @@ const BodyTab = ({ appData }) => {
   );
 };
 
-const StrengthTab = ({ appData, getAllVisibleExercises }) => {
-  const tracked = getAllVisibleExercises()
-    .filter(({ exercise: ex }) => !ex.endsWith('General') && appData.workouts.some(w => w.exercises?.[ex]));
+const fmtDuration = (secs) => {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+};
 
-  if (!tracked.length) return (
+const StrengthTab = ({ appData, getAllVisibleExercises }) => {
+  // Only show exercises that have at least one set with real weight data
+  const hasWeight = (ex) => appData.workouts.some(w => {
+    const d = w.exercises?.[ex];
+    return Array.isArray(d) && d.some(s => s.weight != null && s.weight > 0);
+  });
+
+  const tracked = getAllVisibleExercises()
+    .filter(({ exercise: ex }) => !ex.endsWith('General') && hasWeight(ex));
+
+  // Timed exercises: any exercise with duration data across all sets
+  const timedExercises = getAllVisibleExercises()
+    .map(({ exercise: ex, muscle: m }) => {
+      let totalSecs = 0;
+      appData.workouts.forEach(w => {
+        const d = w.exercises?.[ex];
+        if (Array.isArray(d)) d.forEach(s => { if (s.duration) totalSecs += s.duration; });
+      });
+      return { exercise: ex, muscle: m, totalSecs };
+    })
+    .filter(({ totalSecs }) => totalSecs > 0)
+    .sort((a, b) => b.totalSecs - a.totalSecs);
+
+  if (!tracked.length && !timedExercises.length) return (
     <div className="empty-state">
       <div className="empty-title">NO DATA YET</div>
       <p>Complete some workouts to see strength progress.</p>
@@ -142,31 +168,52 @@ const StrengthTab = ({ appData, getAllVisibleExercises }) => {
 
   return (
     <div>
-      <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>Max weight lifted per exercise</p>
-      {tracked.slice(0, 10).map(({ exercise: ex, muscle: m }) => {
-        const allSets = [];
-        appData.workouts.forEach(w => {
-          const d = w.exercises?.[ex];
-          if (Array.isArray(d)) d.forEach(s => allSets.push({ weight: s.weight || 0, reps: s.reps || 0 }));
-        });
-        if (!allSets.length) return null;
-        const maxW = Math.max(...allSets.map(s => s.weight));
-        const delta = allSets[allSets.length - 1].weight - allSets[0].weight;
-        return (
-          <div key={ex} className="strength-card">
-            <div>
-              <div className="strength-name">{ex}</div>
-              <div className="strength-meta">{m} · {allSets.length} sets logged</div>
-            </div>
-            <div>
-              <div className="strength-max">{maxW} lbs</div>
-              <div className={`strength-delta ${delta >= 0 ? 'delta-good' : 'delta-warn'}`}>
-                {delta >= 0 ? '+' : ''}{delta} lbs
+      {tracked.length > 0 && (
+        <>
+          <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>Max weight lifted per exercise</p>
+          {tracked.slice(0, 10).map(({ exercise: ex, muscle: m }) => {
+            const allSets = [];
+            appData.workouts.forEach(w => {
+              const d = w.exercises?.[ex];
+              if (Array.isArray(d)) d.forEach(s => { if (s.weight > 0) allSets.push({ weight: s.weight, reps: s.reps || 0 }); });
+            });
+            if (!allSets.length) return null;
+            const maxW = Math.max(...allSets.map(s => s.weight));
+            const delta = allSets[allSets.length - 1].weight - allSets[0].weight;
+            return (
+              <div key={ex} className="strength-card">
+                <div>
+                  <div className="strength-name">{ex}</div>
+                  <div className="strength-meta">{m} · {allSets.length} sets logged</div>
+                </div>
+                <div>
+                  <div className="strength-max">{maxW} lbs</div>
+                  <div className={`strength-delta ${delta >= 0 ? 'delta-good' : 'delta-warn'}`}>
+                    {delta >= 0 ? '+' : ''}{delta} lbs
+                  </div>
+                </div>
               </div>
+            );
+          })}
+        </>
+      )}
+
+      {timedExercises.length > 0 && (
+        <>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.5px', color: 'var(--text2)', marginTop: tracked.length ? 24 : 0, marginBottom: 12 }}>
+            CARDIO &amp; TIMED SETS
+          </p>
+          {timedExercises.map(({ exercise: ex, muscle: m, totalSecs }) => (
+            <div key={ex} className="strength-card">
+              <div>
+                <div className="strength-name">{ex}</div>
+                <div className="strength-meta">{m} · total time logged</div>
+              </div>
+              <div className="strength-max">{fmtDuration(totalSecs)}</div>
             </div>
-          </div>
-        );
-      })}
+          ))}
+        </>
+      )}
     </div>
   );
 };
@@ -310,6 +357,16 @@ const InsightsTab = ({ appData, getVisibleExercises, getMuscleForExercise }) => 
 
   const avgPerWeek = recentWks.length / 4;
 
+  const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const cardioSecsThisWeek = workouts
+    .filter(w => new Date(w.startTime || w.date) >= sevenDaysAgo)
+    .reduce((total, w) =>
+      total + Object.entries(w.exercises || {}).reduce((sum, [ex, sets]) => {
+        if (getMuscleForExercise(ex) !== 'cardio' || !Array.isArray(sets)) return sum;
+        return sum + sets.reduce((s, set) => s + (set.duration || 0), 0);
+      }, 0), 0);
+  const cardioMinsThisWeek = Math.round(cardioSecsThisWeek / 60);
+
   const longestGap = (() => {
     if (workouts.length < 2) return null;
     const sorted = [...workouts].sort((a, b) => new Date(a.startTime || a.date) - new Date(b.startTime || b.date));
@@ -330,7 +387,9 @@ const InsightsTab = ({ appData, getVisibleExercises, getMuscleForExercise }) => 
     let best = null, bestDiff = 0;
     Object.entries(exSessions).forEach(([ex, sessions]) => {
       if (sessions.length < 2) return;
-      const diff = Math.max(...sessions.map(s => s.maxWeight)) - sessions[0].maxWeight;
+      const maxW = Math.max(...sessions.map(s => s.maxWeight));
+      if (maxW === 0) return; // skip duration-only exercises
+      const diff = maxW - sessions[0].maxWeight;
       if (diff > bestDiff) { bestDiff = diff; best = { exercise: ex, diff }; }
     });
     return best;
@@ -347,6 +406,7 @@ const InsightsTab = ({ appData, getVisibleExercises, getMuscleForExercise }) => 
   });
   const prs = Object.entries(exSessions)
     .filter(([ex]) => (exWorkoutCount[ex] || 0) >= 3)
+    .filter(([, sessions]) => Math.max(...sessions.map(s => s.maxWeight)) > 0) // exclude duration-only
     .map(([ex, sessions]) => ({ exercise: ex, pr: Math.max(...sessions.map(s => s.maxWeight)) }))
     .sort((a, b) => b.pr - a.pr);
 
@@ -455,6 +515,13 @@ const InsightsTab = ({ appData, getVisibleExercises, getMuscleForExercise }) => 
             headline="Longest Rest Period"
             value={`${longestGap.days} days`}
             desc={`Your longest gap between workouts was ${longestGap.days} days, starting in ${longestGap.month}.`}
+          />
+        )}
+        {cardioMinsThisWeek > 0 && (
+          <InsightCard
+            headline="Cardio This Week"
+            value={`${cardioMinsThisWeek} min`}
+            desc={`You've logged ${cardioMinsThisWeek} minutes of cardio in the last 7 days.`}
           />
         )}
       </InsightSection>
