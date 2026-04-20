@@ -141,10 +141,9 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
         {(() => {
           const HEATMAP_CATEGORIES = [
             { label: 'Arms',   muscles: ['chest','back','shoulders','biceps','triceps'], color: '#E8A87C' },
-            { label: 'Legs',   muscles: ['legs'],    color: '#7EB8F7' },
-            { label: 'Core',   muscles: ['core'],    color: '#A78BFA' },
-            { label: 'Abs',    muscles: ['abs'],     color: '#F472B6' },
-            { label: 'Cardio', muscles: ['cardio'],  color: '#34D399' },
+            { label: 'Legs',   muscles: ['legs'],              color: '#7EB8F7' },
+            { label: 'Core',   muscles: ['core', 'abs'],       color: '#A78BFA' },
+            { label: 'Cardio', muscles: ['cardio'],            color: '#34D399' },
           ];
 
           // Build a lookup: dateStr → Set of muscles worked

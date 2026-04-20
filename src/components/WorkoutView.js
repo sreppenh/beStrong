@@ -14,7 +14,7 @@ const SetEntryModal = ({
 }) => {
   const muscle   = getMuscleForExercise(repsEntry.exercise) || '';
   const isCardio = muscle === 'cardio';
-  const isTimed  = muscle === 'abs' || muscle === 'core';
+  const isTimed  = muscle === 'core';
   const hasTimer = isCardio || isTimed;
 
   const defaultDur = isCardio ? 300 : 60;

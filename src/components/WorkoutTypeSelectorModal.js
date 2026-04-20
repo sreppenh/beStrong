@@ -4,7 +4,6 @@ export const WORKOUT_CATEGORIES = [
   { label: 'Arms',   emoji: '💪', color: '#E8A87C', textColor: '#7A3F10' },
   { label: 'Legs',   emoji: '🦵', color: '#7EB8F7', textColor: '#1A4B7A' },
   { label: 'Core',   emoji: '🔥', color: '#A78BFA', textColor: '#3B1FA8' },
-  { label: 'Abs',    emoji: '✦',  color: '#F472B6', textColor: '#831843' },
   { label: 'Cardio', emoji: '🏃', color: '#34D399', textColor: '#065F46' },
 ];
 
@@ -37,7 +36,7 @@ const WorkoutTypeSelectorModal = ({ initialSelected = [], onConfirm, onCancel })
             return (
               <div
                 key={label}
-                className={`category-tile${label === 'Cardio' ? ' cardio-tile' : ''}${isSelected ? ' selected' : ''}`}
+                className={`category-tile${isSelected ? ' selected' : ''}`}
                 style={isSelected ? { borderColor: color, background: `${color}28` } : {}}
                 onClick={() => toggle(label)}
               >
