@@ -260,15 +260,23 @@ const SetEntryModal = ({
 
 // ── WorkoutView ────────────────────────────────────────────────────────────────
 
+// Category label → muscle key for saving custom exercises
+const CATEGORY_TO_MUSCLE = { Arms: 'chest', Legs: 'legs', Core: 'core', Cardio: 'cardio' };
+
 const WorkoutView = ({
-  muscleGroups, capitalizeFirst, getAllVisibleExercises,
+  muscleGroups, capitalizeFirst, getAllVisibleExercises, getVisibleExercises,
   getMuscleForExercise, currentWorkout, setCurrentWorkout, incrementSet, decrementSet,
-  setView, finishWorkout, hasActiveSets, appData,
+  setView, finishWorkout, hasActiveSets, appData, addCustomExercise,
   repsEntry, setRepsEntry, saveSetWithData,
   abandonConfirmation, setAbandonConfirmation, confirmAbandonWorkout,
   onStartWorkout, timerDisplay, isPaused, togglePause
 }) => {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
+  const [showAddExercise,      setShowAddExercise]      = useState(false);
+  const [newExName,            setNewExName]            = useState('');
+  const [newExCategory,        setNewExCategory]        = useState('');
+  const [addExError,           setAddExError]           = useState('');
+  const exerciseRefs = useRef({});
 
   useEffect(() => {
     if (!currentWorkout.startTime) onStartWorkout();
@@ -291,6 +299,28 @@ const WorkoutView = ({
     const last = d[d.length - 1];
     if (last.duration != null) return fmtTime(last.duration);
     return `${last.weight}lbs × ${last.reps}`;
+  };
+
+  const handleAddExercise = () => {
+    const name = newExName.trim();
+    if (!name) { setAddExError('Please enter an exercise name.'); return; }
+    const muscle = CATEGORY_TO_MUSCLE[newExCategory];
+    if (!muscle) { setAddExError('Please select a category.'); return; }
+    const existing = getVisibleExercises(muscle);
+    if (existing.map(e => e.toLowerCase()).includes(name.toLowerCase())) {
+      setAddExError('That exercise already exists in this category.');
+      return;
+    }
+    addCustomExercise(muscle, name);
+    setShowAddExercise(false);
+    setNewExName('');
+    setNewExCategory('');
+    setAddExError('');
+    // Scroll to new row after render
+    setTimeout(() => {
+      const el = exerciseRefs.current[name];
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
   };
 
   // Muscle strip summary
@@ -361,7 +391,7 @@ const WorkoutView = ({
           const sets       = getSets(ex);
           const lastDisplay = getLastDisplay(ex);
           return (
-            <div key={ex} className={`exercise-row${sets > 0 ? ' worked' : ''}`}>
+            <div key={ex} ref={el => { exerciseRefs.current[ex] = el; }} className={`exercise-row${sets > 0 ? ' worked' : ''}`}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   className="exercise-muscle-tag"
@@ -389,6 +419,19 @@ const WorkoutView = ({
             </div>
           );
         })}
+
+        {/* Add exercise */}
+        <button
+          className="secondary-button add-exercise-btn"
+          onClick={() => {
+            setNewExName('');
+            setNewExCategory(activeCategories.length === 1 ? activeCategories[0] : '');
+            setAddExError('');
+            setShowAddExercise(true);
+          }}
+        >
+          + ADD EXERCISE
+        </button>
 
         {/* Actions */}
         <div className="workout-actions">
@@ -424,6 +467,54 @@ const WorkoutView = ({
           }}
           onCancel={() => setShowCategorySelector(false)}
         />
+      )}
+
+      {/* Add exercise modal */}
+      {showAddExercise && (
+        <div className="modal-overlay" onClick={() => setShowAddExercise(false)}>
+          <div className="modal-sheet" onClick={e => e.stopPropagation()}>
+            <div className="modal-title">ADD EXERCISE</div>
+
+            <input
+              className="add-ex-input"
+              placeholder="Exercise name"
+              value={newExName}
+              onChange={e => { setNewExName(e.target.value); setAddExError(''); }}
+              onKeyDown={e => e.key === 'Enter' && handleAddExercise()}
+              autoFocus
+            />
+
+            {/* Category chips — only show categories active in this workout */}
+            <div className="modal-label" style={{ marginBottom: 8 }}>CATEGORY</div>
+            <div className="add-ex-category-chips">
+              {(activeCategories.length > 0 ? activeCategories : Object.keys(CATEGORY_TO_MUSCLE)).map(cat => {
+                const muscle = CATEGORY_TO_MUSCLE[cat];
+                const color  = muscle ? MUSCLE_COLORS[muscle] : 'var(--lime)';
+                const active = newExCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    className={`add-ex-cat-chip${active ? ' active' : ''}`}
+                    style={active
+                      ? { background: `${color}28`, color, border: `1.5px solid ${color}` }
+                      : { border: '1.5px solid var(--surface3)' }
+                    }
+                    onClick={() => { setNewExCategory(cat); setAddExError(''); }}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+
+            {addExError && <div className="add-ex-error">{addExError}</div>}
+
+            <div className="modal-actions">
+              <button className="primary-button" onClick={handleAddExercise}>SAVE</button>
+              <button className="secondary-button" onClick={() => setShowAddExercise(false)}>CANCEL</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Abandon confirmation */}

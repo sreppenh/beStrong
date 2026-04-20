@@ -379,6 +379,18 @@ body {
 .round-btn.minus:hover { background: #3a3a3a; }
 
 .workout-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.add-exercise-btn { margin-top: 8px; border-color: var(--lime) !important; color: var(--lime) !important; }
+
+/* Add exercise modal */
+.add-ex-category-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.add-ex-cat-chip {
+  padding: 6px 14px; border-radius: 20px; cursor: pointer;
+  font-size: 13px; font-weight: 600; font-family: var(--font-body);
+  background: var(--surface3); color: var(--text2);
+  transition: all 0.15s;
+}
+.add-ex-cat-chip.active { font-weight: 700; }
+.add-ex-error { font-size: 12px; color: var(--danger); margin-bottom: 10px; }
 
 /* ── MEASUREMENTS SCREEN ── */
 .measure-field {
