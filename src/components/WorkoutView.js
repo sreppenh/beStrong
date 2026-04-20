@@ -1,5 +1,186 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Plus } from 'lucide-react';
+
+const fmtTime = (s) =>
+  `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+
+const playBeep = () => {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.6);
+  } catch (e) {}
+};
+
+// ── Set Entry Modal ────────────────────────────────────────────────────────────
+
+const SetEntryModal = ({
+  repsEntry, setRepsEntry, saveSetWithData,
+  getMuscleForExercise, appData, capitalizeFirst
+}) => {
+  const muscle    = getMuscleForExercise(repsEntry.exercise) || '';
+  const isCardio  = muscle === 'cardio';
+  const isTimed   = muscle === 'abs' || muscle === 'core';
+  const hasTimer  = isCardio || isTimed;
+
+  const defaultDur  = isCardio ? 300 : 60;
+  const durStep     = isCardio ? 15  : 5;
+
+  const [duration,     setDuration]     = useState(defaultDur);
+  const [timeLeft,     setTimeLeft]     = useState(defaultDur);
+  const [running,      setRunning]      = useState(false);
+  const [timerDone,    setTimerDone]    = useState(false);
+  const [currentReps,  setCurrentReps]  = useState(repsEntry.currentReps);
+  const [currentWeight,setCurrentWeight]= useState(repsEntry.currentWeight);
+
+  const intervalRef  = useRef(null);
+  const durationRef  = useRef(duration);
+  const saveRef      = useRef(saveSetWithData);
+
+  // Keep refs in sync
+  durationRef.current = duration;
+  saveRef.current     = saveSetWithData;
+
+  // Sync timeLeft with duration changes when idle
+  useEffect(() => {
+    if (!running && !timerDone) setTimeLeft(duration);
+  }, [duration]); // eslint-disable-line
+
+  // Timer countdown
+  useEffect(() => {
+    if (!running) return;
+    intervalRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(intervalRef.current);
+          setRunning(false);
+          playBeep();
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+          const d = durationRef.current;
+          if (isCardio) {
+            saveRef.current(null, null, d);
+          } else {
+            setTimerDone(true);
+            setCurrentReps(Math.round(d / 3));
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(intervalRef.current);
+  }, [running]); // eslint-disable-line
+
+  const handleStart = () => {
+    setTimeLeft(duration);
+    setTimerDone(false);
+    setRunning(true);
+  };
+
+  const handleStop = () => {
+    clearInterval(intervalRef.current);
+    setRunning(false);
+    setTimeLeft(duration);
+  };
+
+  const handleCancel = () => {
+    clearInterval(intervalRef.current);
+    setRepsEntry(null);
+  };
+
+  const handleSave = () => {
+    if (isCardio) {
+      saveSetWithData(null, null, duration);
+    } else {
+      const dur = timerDone ? duration : undefined;
+      saveSetWithData(currentReps, currentWeight, dur);
+    }
+  };
+
+  const wi = appData.settings.weightIncrement || 1;
+
+  return (
+    <div className="modal-overlay" onClick={handleCancel}>
+      <div className="modal-sheet" onClick={e => e.stopPropagation()}>
+        <div className="modal-title">{repsEntry.exercise}</div>
+        <div className="modal-subtitle">{capitalizeFirst(muscle)}</div>
+
+        {/* ── Timer section ── */}
+        {hasTimer && (
+          <div className="timer-section">
+            <div className="modal-label" style={{ marginBottom: 8 }}>TIMER</div>
+
+            {running ? (
+              <>
+                <div className="timer-countdown">{fmtTime(timeLeft)}</div>
+                <button className="timer-stop-btn" onClick={handleStop}>STOP</button>
+              </>
+            ) : (
+              <>
+                <div className="modal-val-row">
+                  <button
+                    className="modal-ctrl-btn minus"
+                    onClick={() => setDuration(d => Math.max(durStep, d - durStep))}
+                  >−</button>
+                  <div className="modal-val" style={{ color: timerDone ? 'var(--lime)' : undefined }}>
+                    {timerDone ? fmtTime(duration) : fmtTime(duration)}
+                  </div>
+                  <button
+                    className="modal-ctrl-btn plus"
+                    onClick={() => setDuration(d => d + durStep)}
+                  >+</button>
+                </div>
+                <button className="timer-start-btn" onClick={handleStart}>
+                  {timerDone ? 'RESTART' : 'START'}
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── Reps / Weight (not cardio) ── */}
+        {!isCardio && (
+          <>
+            {hasTimer && <div className="modal-divider" />}
+
+            <div className="modal-label" style={{ marginBottom: 8 }}>REPS</div>
+            <div className="modal-val-row">
+              <button className="modal-ctrl-btn minus" onClick={() => setCurrentReps(r => Math.max(1, r - 1))}>−</button>
+              <div className="modal-val">{currentReps}</div>
+              <button className="modal-ctrl-btn plus" onClick={() => setCurrentReps(r => Math.min(100, r + 1))}>+</button>
+            </div>
+
+            <div className="modal-divider" />
+
+            <div className="modal-label" style={{ marginBottom: 8 }}>WEIGHT (lbs)</div>
+            <div className="modal-val-row">
+              <button className="modal-ctrl-btn minus" onClick={() => setCurrentWeight(w => Math.max(0, Math.round((w - wi) * 10) / 10))}>−</button>
+              <div className="modal-val">{currentWeight}</div>
+              <button className="modal-ctrl-btn plus" onClick={() => setCurrentWeight(w => Math.round((w + wi) * 10) / 10)}>+</button>
+            </div>
+          </>
+        )}
+
+        {/* ── Actions ── */}
+        {!running && (
+          <div className="modal-actions">
+            <button className="primary-button" onClick={handleSave}>SAVE SET</button>
+            <button className="secondary-button" onClick={handleCancel}>CANCEL</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── WorkoutView ────────────────────────────────────────────────────────────────
 
 const WorkoutView = ({
   muscleGroups, capitalizeFirst, getAllVisibleExercises,
@@ -22,15 +203,17 @@ const WorkoutView = ({
     return Array.isArray(d) ? d.length : (d || 0);
   };
 
-  const getLastRepsDisplay = (ex) => {
+  const getLastDisplay = (ex) => {
     const d = wk[ex];
-    if (Array.isArray(d) && d.length) return `${d[d.length-1].weight}lbs × ${d[d.length-1].reps}`;
-    return null;
+    if (!Array.isArray(d) || !d.length) return null;
+    const last = d[d.length - 1];
+    if (last.duration != null) return fmtTime(last.duration);
+    return `${last.weight}lbs × ${last.reps}`;
   };
 
   // Muscle strip summary
   const muscleStrip = muscleGroups.map(m => {
-    const exes = allExercises.filter(({ muscle }) => muscle === m);
+    const exes  = allExercises.filter(({ muscle }) => muscle === m);
     const total = exes.reduce((a, { exercise: ex }) => a + getSets(ex), 0);
     return { m, total };
   }).filter(x => x.total > 0);
@@ -62,8 +245,8 @@ const WorkoutView = ({
 
         {/* Flat exercise list */}
         {allExercises.map(({ exercise: ex, muscle: m }) => {
-          const sets = getSets(ex);
-          const lastDisplay = getLastRepsDisplay(ex);
+          const sets       = getSets(ex);
+          const lastDisplay = getLastDisplay(ex);
           return (
             <div key={ex} className={`exercise-row${sets > 0 ? ' worked' : ''}`}>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -95,42 +278,22 @@ const WorkoutView = ({
             <button className="primary-button" onClick={finishWorkout}>FINISH WORKOUT</button>
           )}
           <button className="secondary-button" onClick={() => {
-            const hasProgress = hasActiveSets();
-            if (hasProgress) setAbandonConfirmation(true);
-            else { confirmAbandonWorkout(); }
+            if (hasActiveSets()) setAbandonConfirmation(true);
+            else confirmAbandonWorkout();
           }}>ABANDON WORKOUT</button>
         </div>
       </div>
 
-      {/* Reps/Weight Modal */}
+      {/* Set entry modal */}
       {repsEntry && (
-        <div className="modal-overlay" onClick={() => setRepsEntry(null)}>
-          <div className="modal-sheet" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">{repsEntry.exercise}</div>
-            <div className="modal-subtitle">{capitalizeFirst(getMuscleForExercise(repsEntry.exercise) || '')}</div>
-
-            <div className="modal-label" style={{ marginBottom: 8 }}>REPS</div>
-            <div className="modal-val-row">
-              <button className="modal-ctrl-btn minus" onClick={() => setRepsEntry(p => ({ ...p, currentReps: Math.max(1, p.currentReps - 1) }))}>−</button>
-              <div className="modal-val">{repsEntry.currentReps}</div>
-              <button className="modal-ctrl-btn plus" onClick={() => setRepsEntry(p => ({ ...p, currentReps: Math.min(100, p.currentReps + 1) }))}>+</button>
-            </div>
-
-            <div className="modal-divider" />
-
-            <div className="modal-label" style={{ marginBottom: 8 }}>WEIGHT (lbs)</div>
-            <div className="modal-val-row">
-              <button className="modal-ctrl-btn minus" onClick={() => setRepsEntry(p => ({ ...p, currentWeight: Math.max(0, Math.round((p.currentWeight - appData.settings.weightIncrement) * 10) / 10) }))}>−</button>
-              <div className="modal-val">{repsEntry.currentWeight}</div>
-              <button className="modal-ctrl-btn plus" onClick={() => setRepsEntry(p => ({ ...p, currentWeight: Math.round((p.currentWeight + appData.settings.weightIncrement) * 10) / 10 }))}>+</button>
-            </div>
-
-            <div className="modal-actions">
-              <button className="primary-button" onClick={() => saveSetWithData(repsEntry.currentReps, repsEntry.currentWeight)}>SAVE SET</button>
-              <button className="secondary-button" onClick={() => setRepsEntry(null)}>CANCEL</button>
-            </div>
-          </div>
-        </div>
+        <SetEntryModal
+          repsEntry={repsEntry}
+          setRepsEntry={setRepsEntry}
+          saveSetWithData={saveSetWithData}
+          getMuscleForExercise={getMuscleForExercise}
+          appData={appData}
+          capitalizeFirst={capitalizeFirst}
+        />
       )}
 
       {/* Abandon confirmation */}

@@ -130,19 +130,26 @@ function App() {
     });
   };
 
-  const saveSetWithData = (reps, weight) => {
+  const saveSetWithData = (reps, weight, duration) => {
     if (!repsEntry) return;
     const { exercise } = repsEntry;
+    const makeEntry = (setNum) => {
+      const entry = { set: setNum };
+      if (reps != null) entry.reps = reps;
+      if (weight != null) entry.weight = weight;
+      if (duration != null) entry.duration = duration;
+      return entry;
+    };
     setCurrentWorkout(prev => {
       const cur = prev[exercise];
       let newData;
       if (Array.isArray(cur)) {
-        newData = [...cur, { set: cur.length + 1, reps, weight }];
+        newData = [...cur, makeEntry(cur.length + 1)];
       } else if (typeof cur === 'number') {
         const existing = Array.from({ length: cur }, (_, i) => ({ set: i + 1, reps: getLastReps(exercise), weight: getLastWeight(exercise) }));
-        newData = [...existing, { set: cur + 1, reps, weight }];
+        newData = [...existing, makeEntry(cur + 1)];
       } else {
-        newData = [{ set: 1, reps, weight }];
+        newData = [makeEntry(1)];
       }
       return { ...prev, [exercise]: newData };
     });
