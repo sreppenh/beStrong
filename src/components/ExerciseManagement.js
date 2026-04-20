@@ -5,8 +5,8 @@ import { exerciseLibrary } from '../data/exercises';
 const ExerciseManagement = ({
   exerciseManagement, setExerciseManagement, setView,
   muscleGroups, capitalizeFirst,
-  getCustomExercises, getHiddenDefaultExercises, getVisibleExercises,
-  addCustomExercise, removeExercise, moveExerciseUp, moveExerciseDown,
+  getCustomExercises, getHiddenDefaultExercises, getArchivedExercises, getVisibleExercises,
+  addCustomExercise, removeExercise, restoreArchivedExercise, moveExerciseUp, moveExerciseDown,
   restoreDefaultExercise, exerciseHasHistory
 }) => {
 
@@ -24,9 +24,10 @@ const ExerciseManagement = ({
           </p>
           <div className="muscle-sel-grid">
             {muscleGroups.map(m => {
-              const custom = getCustomExercises(m).length;
-              const hidden = getHiddenDefaultExercises(m).length;
-              const visible = getVisibleExercises(m).length;
+              const custom   = getCustomExercises(m).length;
+              const hidden   = getHiddenDefaultExercises(m).length;
+              const archived = getArchivedExercises(m).length;
+              const visible  = getVisibleExercises(m).length;
               return (
                 <button
                   key={m}
@@ -35,7 +36,7 @@ const ExerciseManagement = ({
                 >
                   <div className="muscle-sel-name">{capitalizeFirst(m)}</div>
                   <div className="muscle-sel-stats">
-                    {visible} active{custom ? ` · ${custom} custom` : ''}{hidden ? ` · ${hidden} hidden` : ''}
+                    {visible} active{custom ? ` · ${custom} custom` : ''}{hidden ? ` · ${hidden} hidden` : ''}{archived ? ` · ${archived} archived` : ''}
                   </div>
                 </button>
               );
@@ -47,8 +48,9 @@ const ExerciseManagement = ({
   }
 
   const m = exerciseManagement.muscleGroup;
-  const visible = getVisibleExercises(m);
-  const hidden = getHiddenDefaultExercises(m);
+  const visible  = getVisibleExercises(m);
+  const hidden   = getHiddenDefaultExercises(m);
+  const archived = getArchivedExercises(m);
 
   return (
     <div className="app-container">
@@ -142,6 +144,23 @@ const ExerciseManagement = ({
             ))}
           </>
         )}
+
+        {/* Archived custom exercises */}
+        {archived.length > 0 && (
+          <>
+            <div className="section-title" style={{ marginTop: 24 }}>ARCHIVED CUSTOM EXERCISES</div>
+            <p style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 12 }}>Tap + to restore to your custom list.</p>
+            {archived.map(ex => (
+              <div key={ex} className="hidden-ex-row">
+                <div>
+                  <div className="ex-mgmt-name" style={{ color: 'var(--text2)' }}>{ex}</div>
+                  <div className="ex-mgmt-meta">Archived{exerciseHasHistory(ex) ? ' · has history' : ''}</div>
+                </div>
+                <button className="ex-restore-btn" onClick={() => restoreArchivedExercise(m, ex)}>+</button>
+              </div>
+            ))}
+          </>
+        )}
       </div>
 
       {/* Delete confirmation */}
@@ -155,9 +174,7 @@ const ExerciseManagement = ({
                 ? exerciseManagement.deleteConfirmation.hasHistory
                   ? 'History preserved. It will be hidden from future workouts and can be restored.'
                   : 'It will be hidden from future workouts and can be restored later.'
-                : exerciseManagement.deleteConfirmation.hasHistory
-                  ? 'History preserved. The exercise will be removed from your custom list.'
-                  : 'This exercise will be permanently removed.'}
+                : 'History preserved. It will be archived and can be restored from the Archived section.'}
             </div>
             <button className="danger-button" onClick={() => {
               removeExercise(

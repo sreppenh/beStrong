@@ -10,6 +10,7 @@ export const useAppData = () => {
       weightIncrement: 1,
       customExercises: {},
       hiddenExercises: {},
+      archivedExercises: {},
       exerciseOrder: {}
     }
   });

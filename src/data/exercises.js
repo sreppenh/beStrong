@@ -5,5 +5,7 @@ export const exerciseLibrary = {
   biceps: ["Curl-Ups", "Incline Curls", "Standing Curls", "Hammer Curls", "Biceps General"],
   triceps: ["Skull Crushers", "Overhead Lift", "Bench Dips", "Triceps General"],
   legs: ["Squats", "Deadlifts", "Legs General"],
-  core: ["Leg Raises", "Sit-Ups", "Ab Wheel", "Russian Twists", "Core General"]
+  core: ["Leg Raises", "Sit-Ups", "Ab Wheel", "Russian Twists", "Core General"],
+  abs: ["Crunches", "Plank", "Bicycle Kicks", "Flutter Kicks", "Abs General"],
+  cardio: ["Treadmill Walk", "Outdoor Walk", "Cardio General"]
 };

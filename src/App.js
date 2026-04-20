@@ -90,6 +90,7 @@ function App() {
 
   const getCustomExercises = m => appData.settings.customExercises[m] || [];
   const getHiddenDefaultExercises = m => appData.settings.hiddenExercises?.[m] || [];
+  const getArchivedExercises = m => appData.settings.archivedExercises?.[m] || [];
 
   const exerciseHasHistory = ex => appData.workouts.some(w => w.exercises?.[ex]);
 
@@ -225,12 +226,28 @@ function App() {
         settings: { ...prev.settings, hiddenExercises: { ...prev.settings.hiddenExercises, [muscle]: [...(prev.settings.hiddenExercises?.[muscle] || []), exerciseName] } }
       }));
     } else {
+      // Archive custom exercises instead of permanently deleting — preserves workout history
       setAppData(prev => ({
         ...prev,
-        settings: { ...prev.settings, customExercises: { ...prev.settings.customExercises, [muscle]: (prev.settings.customExercises[muscle] || []).filter(e => e !== exerciseName) } }
+        settings: {
+          ...prev.settings,
+          customExercises: { ...prev.settings.customExercises, [muscle]: (prev.settings.customExercises[muscle] || []).filter(e => e !== exerciseName) },
+          archivedExercises: { ...prev.settings.archivedExercises, [muscle]: [...(prev.settings.archivedExercises?.[muscle] || []), exerciseName] }
+        }
       }));
     }
     setExerciseManagement(p => ({ ...p, deleteConfirmation: null }));
+  };
+
+  const restoreArchivedExercise = (muscle, exerciseName) => {
+    setAppData(prev => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        archivedExercises: { ...prev.settings.archivedExercises, [muscle]: (prev.settings.archivedExercises?.[muscle] || []).filter(e => e !== exerciseName) },
+        customExercises: { ...prev.settings.customExercises, [muscle]: [...(prev.settings.customExercises[muscle] || []), exerciseName] }
+      }
+    }));
   };
 
   const moveExerciseUp = (muscle, exerciseName) => {
@@ -260,7 +277,7 @@ function App() {
 
   const executeReset = (type) => {
     if (type === 'factory') {
-      setAppData({ workouts: [], measurements: [], settings: { repsTracking: true, weightTracking: true, weightIncrement: 1, customExercises: {}, hiddenExercises: {}, exerciseOrder: {} } });
+      setAppData({ workouts: [], measurements: [], settings: { repsTracking: true, weightTracking: true, weightIncrement: 1, customExercises: {}, hiddenExercises: {}, archivedExercises: {}, exerciseOrder: {} } });
       setCurrentWorkout({});
       setView('home');
     }
@@ -298,10 +315,10 @@ function App() {
     appData, setAppData, currentWorkout, setCurrentWorkout,
     muscleGroups: MUSCLE_GROUPS, capitalizeFirst,
     getVisibleExercises, getAllVisibleExercises, getMuscleForExercise,
-    getCustomExercises, getHiddenDefaultExercises,
+    getCustomExercises, getHiddenDefaultExercises, getArchivedExercises,
     incrementSet, decrementSet, finishWorkout, confirmAbandonWorkout,
     hasActiveSets, exerciseHasHistory,
-    addCustomExercise, removeExercise, moveExerciseUp, moveExerciseDown, restoreDefaultExercise,
+    addCustomExercise, removeExercise, restoreArchivedExercise, moveExerciseUp, moveExerciseDown, restoreDefaultExercise,
     updateSettings, exportToCSV, executeReset, deleteWorkout, updateWorkout, saveMeasurement, updateMeasurement,
     editMeasurementIdx, setEditMeasurementIdx,
     editWorkoutIdx, setEditWorkoutIdx,
