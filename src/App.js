@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import HomeView from './components/HomeView';
 import WorkoutView from './components/WorkoutView';
 import MeasurementsView from './components/MeasurementsView';
