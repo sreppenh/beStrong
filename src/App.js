@@ -26,6 +26,10 @@ function App() {
   });
   const [timerDisplay, setTimerDisplay] = useState('00:00');
   const [workoutStart, setWorkoutStart] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef      = useRef(false);
+  const pausedAtRef      = useRef(null);   // timestamp when last paused
+  const totalPausedMsRef = useRef(0);      // accumulated paused ms
 
   // Auto-save
   useEffect(() => { saveData(appData); }, [appData, saveData]);
@@ -53,11 +57,14 @@ function App() {
     } catch (e) {}
   }, [currentWorkout]);
 
-  // Workout timer
+  // Workout timer — subtracts accumulated paused time from elapsed
   useEffect(() => {
     if (!workoutStart) return;
     const interval = setInterval(() => {
-      const s = Math.floor((Date.now() - workoutStart) / 1000);
+      const pausedSoFar = isPausedRef.current
+        ? totalPausedMsRef.current + (Date.now() - pausedAtRef.current)
+        : totalPausedMsRef.current;
+      const s = Math.max(0, Math.floor((Date.now() - workoutStart - pausedSoFar) / 1000));
       setTimerDisplay(`${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`);
     }, 1000);
     return () => clearInterval(interval);
@@ -120,7 +127,29 @@ function App() {
   };
 
   // ── Actions ──────────────────────────────────────────────
+  const resetPauseState = () => {
+    setIsPaused(false);
+    isPausedRef.current      = false;
+    pausedAtRef.current      = null;
+    totalPausedMsRef.current = 0;
+  };
+
+  const togglePause = () => {
+    setIsPaused(prev => {
+      const nowPaused = !prev;
+      isPausedRef.current = nowPaused;
+      if (nowPaused) {
+        pausedAtRef.current = Date.now();
+      } else {
+        totalPausedMsRef.current += Date.now() - (pausedAtRef.current || Date.now());
+        pausedAtRef.current = null;
+      }
+      return nowPaused;
+    });
+  };
+
   const handleStartWorkout = (categories = []) => {
+    resetPauseState();
     setWorkoutStart(Date.now());
     setCurrentWorkout({ startTime: new Date().toISOString(), categories });
   };
@@ -174,15 +203,20 @@ function App() {
 
   const finishWorkout = () => {
     if (!hasActiveSets()) { alert('No sets logged yet!'); return; }
+    const totalPaused = isPausedRef.current
+      ? totalPausedMsRef.current + (Date.now() - (pausedAtRef.current || Date.now()))
+      : totalPausedMsRef.current;
     const newWorkout = {
       date: new Date().toISOString().split('T')[0],
       startTime: currentWorkout.startTime || new Date().toISOString(),
       exercises: Object.fromEntries(Object.entries(currentWorkout).filter(([k]) => !WORKOUT_RESERVED_KEYS.has(k))),
       ...(currentWorkout.categories?.length > 0 && { categories: currentWorkout.categories }),
+      ...(totalPaused > 0 && { pausedDuration: totalPaused }),
     };
     setAppData(prev => ({ ...prev, workouts: [...prev.workouts, newWorkout] }));
     setCurrentWorkout({});
     setWorkoutStart(null);
+    resetPauseState();
     setAbandonConfirmation(false);
     setView('home');
   };
@@ -190,6 +224,7 @@ function App() {
   const confirmAbandonWorkout = () => {
     setCurrentWorkout({});
     setWorkoutStart(null);
+    resetPauseState();
     setAbandonConfirmation(false);
     setView('home');
   };
@@ -338,6 +373,7 @@ function App() {
     resetConfirmation, setResetConfirmation,
     exerciseManagement, setExerciseManagement,
     onStartWorkout: handleStartWorkout, timerDisplay,
+    isPaused, togglePause,
     setView
   };
 

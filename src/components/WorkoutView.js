@@ -266,7 +266,7 @@ const WorkoutView = ({
   setView, finishWorkout, hasActiveSets, appData,
   repsEntry, setRepsEntry, saveSetWithData,
   abandonConfirmation, setAbandonConfirmation, confirmAbandonWorkout,
-  onStartWorkout, timerDisplay
+  onStartWorkout, timerDisplay, isPaused, togglePause
 }) => {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
 
@@ -304,12 +304,19 @@ const WorkoutView = ({
     <div className="app-container">
       <div className="app-header">
         <div style={{ width: 36 }} />
-        <div>
+        <div style={{ textAlign: 'center' }}>
           <div className="app-title">WORKOUT</div>
-          <div className="app-subtitle">{timerDisplay}</div>
+          <div className="app-subtitle" style={{ color: isPaused ? 'var(--text2)' : undefined }}>
+            {timerDisplay}
+          </div>
+          {isPaused && <div className="timer-paused-label">paused</div>}
         </div>
-        <div style={{ width: 36 }} />
+        <button className="icon-button" onClick={togglePause} title={isPaused ? 'Resume' : 'Pause'}>
+          {isPaused ? '▶' : '⏸'}
+        </button>
       </div>
+
+      {isPaused && <div className="paused-banner">WORKOUT PAUSED</div>}
 
       <div className="app-content">
         {/* Selected category chips */}
