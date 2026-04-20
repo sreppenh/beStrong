@@ -192,11 +192,10 @@ body {
 .history-date { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
 .history-muscles { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .muscle-tag {
-  background: var(--surface2);
   border-radius: 6px;
   padding: 3px 8px;
   font-size: 11px;
-  color: var(--lime);
+  font-weight: 600;
 }
 .delete-history-btn {
   background: transparent; border: none;
@@ -242,8 +241,7 @@ body {
 }
 .exercise-row.worked { background: #1A2A08; }
 .exercise-muscle-tag {
-  display: inline-block; font-size: 10px;
-  color: var(--lime); background: #1E2A0E;
+  display: inline-block; font-size: 10px; font-weight: 600;
   border-radius: 4px; padding: 2px 6px; margin-bottom: 3px;
 }
 .exercise-name { font-size: 14px; font-weight: 500; }

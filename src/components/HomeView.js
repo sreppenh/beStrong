@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Settings, Pencil } from 'lucide-react';
 import { exerciseLibrary } from '../data/exercises';
+import { MUSCLE_COLORS, MUSCLE_TEXT_COLORS, MUSCLE_GROUP_LABELS } from '../data/categories';
 
 const MUSCLE_GROUPS = Object.keys(exerciseLibrary);
 
@@ -215,7 +216,18 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
                     </div>
                   </div>
                   <div className="history-muscles">
-                    {muscles.map(m => <span key={m} className="muscle-tag">{capitalizeFirst(m)}</span>)}
+                    {[...new Set(muscles.map(m => MUSCLE_GROUP_LABELS[m] || capitalizeFirst(m)))].map(label => {
+                      const src = muscles.find(m => (MUSCLE_GROUP_LABELS[m] || capitalizeFirst(m)) === label);
+                      return (
+                        <span
+                          key={label}
+                          className="muscle-tag"
+                          style={{ background: MUSCLE_COLORS[src] || 'var(--surface2)', color: MUSCLE_TEXT_COLORS[src] || 'var(--text)' }}
+                        >
+                          {label}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               );

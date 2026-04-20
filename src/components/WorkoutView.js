@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Plus } from 'lucide-react';
+import { MUSCLE_COLORS, MUSCLE_GROUP_LABELS } from '../data/categories';
 
 const fmtTime = (s) =>
   `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -250,7 +251,12 @@ const WorkoutView = ({
           return (
             <div key={ex} className={`exercise-row${sets > 0 ? ' worked' : ''}`}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="exercise-muscle-tag">{m}</div>
+                <div
+                  className="exercise-muscle-tag"
+                  style={{ color: MUSCLE_COLORS[m] || 'var(--lime)', background: `${MUSCLE_COLORS[m] || '#C8F135'}1A` }}
+                >
+                  {MUSCLE_GROUP_LABELS[m] || m}
+                </div>
                 <div className="exercise-name">{ex}</div>
                 <div className="exercise-meta">
                   {sets > 0 ? `${sets} sets · ` : ''}
