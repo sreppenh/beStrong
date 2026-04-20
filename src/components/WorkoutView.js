@@ -339,6 +339,7 @@ const WorkoutView = ({
             setCurrentWorkout(prev => ({ ...prev, categories: cats }));
             setShowCategorySelector(false);
           }}
+          onCancel={() => setShowCategorySelector(false)}
         />
       )}
 

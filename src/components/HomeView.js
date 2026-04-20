@@ -338,6 +338,7 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
             onStartWorkout(cats);
             setView('workout');
           }}
+          onCancel={() => setShowCategorySelector(false)}
         />
       )}
 

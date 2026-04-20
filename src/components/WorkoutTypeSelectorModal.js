@@ -8,7 +8,7 @@ export const WORKOUT_CATEGORIES = [
   { label: 'Cardio', emoji: '🏃', color: '#34D399', textColor: '#065F46' },
 ];
 
-const WorkoutTypeSelectorModal = ({ initialSelected = [], onConfirm }) => {
+const WorkoutTypeSelectorModal = ({ initialSelected = [], onConfirm, onCancel }) => {
   const [selected, setSelected] = useState(initialSelected);
 
   const toggle = (label) => {
@@ -20,7 +20,7 @@ const WorkoutTypeSelectorModal = ({ initialSelected = [], onConfirm }) => {
   const allSelected = selected.length === WORKOUT_CATEGORIES.length;
 
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay" onClick={onCancel}>
       <div className="modal-sheet wts-sheet" onClick={e => e.stopPropagation()}>
         <div className="modal-title">WHAT ARE YOU<br />TRAINING TODAY?</div>
 
