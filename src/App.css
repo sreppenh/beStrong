@@ -667,6 +667,53 @@ body {
 }
 .timer-stop-btn:hover { background: var(--warn); color: var(--ink); }
 
+/* Running timer states */
+.timer-warn { color: var(--warn) !important; }
+
+@keyframes timerPulse {
+  0%   { opacity: 1; }
+  8%   { opacity: 0.45; }
+  22%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+.timer-pulse { animation: timerPulse 1s linear infinite; }
+
+@keyframes doneFlash {
+  0%, 100% { color: var(--lime); opacity: 1; }
+  40%       { opacity: 0.2; }
+}
+.timer-done-flash { animation: doneFlash 0.5s ease-in-out 3 forwards; color: var(--lime); }
+
+/* 3-2-1 countdown overlay */
+.countdown-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+@keyframes countdownPop {
+  0%   { transform: scale(1.45); opacity: 0; }
+  35%  { opacity: 1; }
+  100% { transform: scale(1.0);  opacity: 1; }
+}
+
+.countdown-number {
+  font-family: var(--font-display);
+  font-size: 120px;
+  line-height: 1;
+  color: var(--text);
+  animation: countdownPop 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.countdown-number.countdown-go {
+  font-size: 80px;
+  color: var(--lime);
+}
+
 .confirm-title {
   font-family: var(--font-display); font-size: 24px;
   color: var(--text); margin-bottom: 8px;
