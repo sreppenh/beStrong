@@ -121,7 +121,6 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
         </div>
 
         {/* Streak */}
-        <div className="section-title">THIS WEEK</div>
         <div className="streak-row">
           {Array.from({ length: 7 }, (_, i) => {
             const d = new Date(now);
@@ -135,6 +134,83 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
             );
           })}
         </div>
+
+        {/* Weekly heatmap */}
+        {(() => {
+          const HEATMAP_CATEGORIES = [
+            { label: 'Arms',   muscles: ['chest','back','shoulders','biceps','triceps'], color: '#E8A87C' },
+            { label: 'Legs',   muscles: ['legs'],    color: '#7EB8F7' },
+            { label: 'Core',   muscles: ['core'],    color: '#A78BFA' },
+            { label: 'Abs',    muscles: ['abs'],     color: '#F472B6' },
+            { label: 'Cardio', muscles: ['cardio'],  color: '#34D399' },
+          ];
+
+          // Build a lookup: dateStr → Set of muscles worked
+          const dayMuscles = {};
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - (6 - i));
+            dayMuscles[d.toISOString().split('T')[0]] = new Set();
+          }
+          appData.workouts.forEach(w => {
+            const dStr = (w.startTime || w.date || '').split('T')[0];
+            if (!dayMuscles[dStr]) return;
+            Object.keys(w.exercises || {}).forEach(ex => {
+              let muscle = MUSCLE_GROUPS.find(m => exerciseLibrary[m].includes(ex));
+              if (!muscle) muscle = MUSCLE_GROUPS.find(m => (appData.settings.customExercises[m] || []).includes(ex));
+              if (muscle) dayMuscles[dStr].add(muscle);
+            });
+          });
+
+          const days = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(now);
+            d.setDate(d.getDate() - (6 - i));
+            return { dStr: d.toISOString().split('T')[0], day: d.getDay(), daysAgo: 6 - i };
+          });
+
+          return (
+            <>
+              <div className="section-title">THIS WEEK</div>
+              <div className="card heatmap-card">
+                {/* Day headers */}
+                <div className="heatmap-row heatmap-header">
+                  <div className="heatmap-row-label" />
+                  {days.map(({ day }, i) => (
+                    <div key={i} className="heatmap-day-header">
+                      {['S','M','T','W','T','F','S'][day]}
+                    </div>
+                  ))}
+                  <div className="heatmap-row-right" />
+                </div>
+
+                {/* Category rows */}
+                {HEATMAP_CATEGORIES.map(({ label, muscles, color }) => {
+                  const lastActiveIdx = days.reduce((acc, { dStr }, i) =>
+                    muscles.some(m => dayMuscles[dStr]?.has(m)) ? i : acc, -1);
+
+                  return (
+                    <div key={label} className="heatmap-row">
+                      <div className="heatmap-row-label">{label}</div>
+                      {days.map(({ dStr, daysAgo }, i) => {
+                        const active = muscles.some(m => dayMuscles[dStr]?.has(m));
+                        return (
+                          <div
+                            key={i}
+                            className="heatmap-cell"
+                            style={{ background: active ? color : 'var(--surface3)' }}
+                          />
+                        );
+                      })}
+                      <div className="heatmap-row-right" style={{ color: lastActiveIdx === 6 ? 'var(--lime)' : 'var(--text2)' }}>
+                        {lastActiveIdx === -1 ? '—' : lastActiveIdx === 6 ? 'today' : `${days[lastActiveIdx].daysAgo}d ago`}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          );
+        })()}
 
         {/* Actions */}
         <div className="home-actions">
