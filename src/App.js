@@ -94,7 +94,10 @@ function App() {
 
   const exerciseHasHistory = ex => appData.workouts.some(w => w.exercises?.[ex]);
 
-  const hasActiveSets = () => Object.values(currentWorkout).some(v => Array.isArray(v) ? v.length > 0 : v > 0);
+  const WORKOUT_RESERVED_KEYS = new Set(['startTime', 'categories']);
+  const hasActiveSets = () =>
+    Object.entries(currentWorkout).some(([k, v]) =>
+      !WORKOUT_RESERVED_KEYS.has(k) && (Array.isArray(v) ? v.length > 0 : v > 0));
 
   const getLastReps = (ex) => {
     const cur = currentWorkout[ex];
@@ -117,9 +120,9 @@ function App() {
   };
 
   // ── Actions ──────────────────────────────────────────────
-  const handleStartWorkout = () => {
+  const handleStartWorkout = (categories = []) => {
     setWorkoutStart(Date.now());
-    setCurrentWorkout({ startTime: new Date().toISOString() });
+    setCurrentWorkout({ startTime: new Date().toISOString(), categories });
   };
 
   const incrementSet = (exercise) => {
@@ -174,7 +177,8 @@ function App() {
     const newWorkout = {
       date: new Date().toISOString().split('T')[0],
       startTime: currentWorkout.startTime || new Date().toISOString(),
-      exercises: Object.fromEntries(Object.entries(currentWorkout).filter(([k]) => k !== 'startTime'))
+      exercises: Object.fromEntries(Object.entries(currentWorkout).filter(([k]) => !WORKOUT_RESERVED_KEYS.has(k))),
+      ...(currentWorkout.categories?.length > 0 && { categories: currentWorkout.categories }),
     };
     setAppData(prev => ({ ...prev, workouts: [...prev.workouts, newWorkout] }));
     setCurrentWorkout({});

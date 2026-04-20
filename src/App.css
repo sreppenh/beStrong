@@ -222,6 +222,66 @@ body {
 
 .home-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
 
+/* ── Workout Type Selector ── */
+.wts-sheet { padding-bottom: 48px; }
+.select-all-link {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; color: var(--text2); text-decoration: underline;
+  padding: 0; margin-bottom: 14px; display: inline-block;
+  font-family: var(--font-body);
+}
+.select-all-link:hover { color: var(--text); }
+
+.category-tile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.category-tile {
+  background: var(--surface2);
+  border: 2px solid var(--surface3);
+  border-radius: 14px;
+  padding: 16px 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.category-tile.cardio-tile { grid-column: 1 / -1; }
+.category-tile-emoji { font-size: 28px; margin-bottom: 6px; line-height: 1; }
+.category-tile-label {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  color: var(--text2);
+}
+.category-tile.selected .category-tile-label { font-weight: 600; }
+
+/* ── Category chips in WorkoutView ── */
+.category-chips-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.category-chips-list { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+.category-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.change-categories-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; color: var(--text2); text-decoration: underline;
+  padding: 0; font-family: var(--font-body);
+  white-space: nowrap; flex-shrink: 0;
+}
+.change-categories-btn:hover { color: var(--text); }
+
 .history-item {
   background: var(--surface);
   border-radius: 12px;

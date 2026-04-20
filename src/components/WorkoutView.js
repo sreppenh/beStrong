@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Plus } from 'lucide-react';
 import { MUSCLE_COLORS, MUSCLE_GROUP_LABELS } from '../data/categories';
+import WorkoutTypeSelectorModal, { WORKOUT_CATEGORIES } from './WorkoutTypeSelectorModal';
 
 const fmtTime = (s) =>
   `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -185,18 +186,22 @@ const SetEntryModal = ({
 
 const WorkoutView = ({
   muscleGroups, capitalizeFirst, getAllVisibleExercises,
-  getMuscleForExercise, currentWorkout, incrementSet, decrementSet,
+  getMuscleForExercise, currentWorkout, setCurrentWorkout, incrementSet, decrementSet,
   setView, finishWorkout, hasActiveSets, appData,
   repsEntry, setRepsEntry, saveSetWithData,
   abandonConfirmation, setAbandonConfirmation, confirmAbandonWorkout,
   onStartWorkout, timerDisplay
 }) => {
+  const [showCategorySelector, setShowCategorySelector] = useState(false);
 
   useEffect(() => {
     if (!currentWorkout.startTime) onStartWorkout();
   }, []); // eslint-disable-line
 
-  const allExercises = getAllVisibleExercises();
+  const activeCategories = currentWorkout.categories || [];
+  const allExercises = getAllVisibleExercises().filter(({ muscle }) =>
+    activeCategories.length === 0 || activeCategories.includes(MUSCLE_GROUP_LABELS[muscle] || muscle)
+  );
   const wk = currentWorkout;
 
   const getSets = (ex) => {
@@ -231,6 +236,30 @@ const WorkoutView = ({
       </div>
 
       <div className="app-content">
+        {/* Selected category chips */}
+        {activeCategories.length > 0 && (
+          <div className="category-chips-row">
+            <div className="category-chips-list">
+              {activeCategories.map(cat => {
+                const meta = WORKOUT_CATEGORIES.find(c => c.label === cat);
+                if (!meta) return null;
+                return (
+                  <span
+                    key={cat}
+                    className="category-chip"
+                    style={{ background: `${meta.color}22`, color: meta.color, border: `1px solid ${meta.color}55` }}
+                  >
+                    {meta.emoji} {cat}
+                  </span>
+                );
+              })}
+            </div>
+            <button className="change-categories-btn" onClick={() => setShowCategorySelector(true)}>
+              change
+            </button>
+          </div>
+        )}
+
         {/* Muscle summary strip */}
         <div className="workout-strip">
           {muscleStrip.length === 0
@@ -299,6 +328,17 @@ const WorkoutView = ({
           getMuscleForExercise={getMuscleForExercise}
           appData={appData}
           capitalizeFirst={capitalizeFirst}
+        />
+      )}
+
+      {/* Category selector (mid-workout change) */}
+      {showCategorySelector && (
+        <WorkoutTypeSelectorModal
+          initialSelected={activeCategories}
+          onConfirm={(cats) => {
+            setCurrentWorkout(prev => ({ ...prev, categories: cats }));
+            setShowCategorySelector(false);
+          }}
         />
       )}
 

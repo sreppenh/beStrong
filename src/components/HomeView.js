@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Settings, Pencil } from 'lucide-react';
 import { exerciseLibrary } from '../data/exercises';
 import { MUSCLE_COLORS, MUSCLE_TEXT_COLORS, MUSCLE_GROUP_LABELS } from '../data/categories';
+import WorkoutTypeSelectorModal, { WORKOUT_CATEGORIES } from './WorkoutTypeSelectorModal';
 
 const MUSCLE_GROUPS = Object.keys(exerciseLibrary);
 
-const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorkout, setEditMeasurementIdx, setEditWorkoutIdx }) => {
+const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorkout, setEditMeasurementIdx, setEditWorkoutIdx, onStartWorkout }) => {
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+  const [showCategorySelector, setShowCategorySelector] = useState(false);
 
   const formatDate = (dateStr) => {
     const now = new Date();
@@ -214,7 +216,7 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
 
         {/* Actions */}
         <div className="home-actions">
-          <button className="primary-button" onClick={() => setView('workout')}>START WORKOUT</button>
+          <button className="primary-button" onClick={() => setShowCategorySelector(true)}>START WORKOUT</button>
           <button className="secondary-button" onClick={() => setView('measurements-scale')}>LOG WEIGHT &amp; BODY FAT</button>
           <button className="secondary-button" onClick={() => setView('measurements-body')}>LOG MEASUREMENTS</button>
         </div>
@@ -292,18 +294,33 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
                     </div>
                   </div>
                   <div className="history-muscles">
-                    {[...new Set(muscles.map(m => MUSCLE_GROUP_LABELS[m] || capitalizeFirst(m)))].map(label => {
-                      const src = muscles.find(m => (MUSCLE_GROUP_LABELS[m] || capitalizeFirst(m)) === label);
-                      return (
-                        <span
-                          key={label}
-                          className="muscle-tag"
-                          style={{ background: MUSCLE_COLORS[src] || 'var(--surface2)', color: MUSCLE_TEXT_COLORS[src] || 'var(--text)' }}
-                        >
-                          {label}
-                        </span>
-                      );
-                    })}
+                    {w.categories?.length > 0
+                      ? w.categories.map(cat => {
+                          const meta = WORKOUT_CATEGORIES.find(c => c.label === cat);
+                          if (!meta) return null;
+                          return (
+                            <span
+                              key={cat}
+                              className="muscle-tag"
+                              style={{ background: `${meta.color}28`, color: meta.color }}
+                            >
+                              {meta.emoji} {cat}
+                            </span>
+                          );
+                        })
+                      : [...new Set(muscles.map(m => MUSCLE_GROUP_LABELS[m] || capitalizeFirst(m)))].map(label => {
+                          const src = muscles.find(m => (MUSCLE_GROUP_LABELS[m] || capitalizeFirst(m)) === label);
+                          return (
+                            <span
+                              key={label}
+                              className="muscle-tag"
+                              style={{ background: MUSCLE_COLORS[src] || 'var(--surface2)', color: MUSCLE_TEXT_COLORS[src] || 'var(--text)' }}
+                            >
+                              {label}
+                            </span>
+                          );
+                        })
+                    }
                   </div>
                 </div>
               );
@@ -311,6 +328,18 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
           </>
         )}
       </div>
+
+      {/* Workout type selector */}
+      {showCategorySelector && (
+        <WorkoutTypeSelectorModal
+          initialSelected={[]}
+          onConfirm={(cats) => {
+            setShowCategorySelector(false);
+            onStartWorkout(cats);
+            setView('workout');
+          }}
+        />
+      )}
 
       {/* Delete confirmation modal */}
       {deleteConfirmation && (
