@@ -34,7 +34,10 @@ export const useAppData = () => {
       customExercises: {},
       hiddenExercises: {},
       archivedExercises: {},
-      exerciseOrder: {}
+      exerciseOrder: {},
+      restTimerEnabled: true,
+      restTimerArmsLegs: 90,
+      restTimerCoreCardio: 45
     }
   });
 

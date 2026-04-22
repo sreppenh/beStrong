@@ -1,6 +1,8 @@
 import React from 'react';
 import { ArrowLeft, Download } from 'lucide-react';
 
+const fmtSecs = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
 const SettingsView = ({
   appData, setView, updateSettings, exportToCSV,
   resetConfirmation, setResetConfirmation, executeReset
@@ -57,6 +59,63 @@ const SettingsView = ({
               </div>
               <span style={{ fontSize: 13, color: 'var(--text2)' }}>lbs / inches</span>
             </div>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <div className="settings-section-title">REST TIMER</div>
+          <div className="card">
+            <div className="settings-row">
+              <div>
+                <div className="settings-row-name">Rest Timer</div>
+                <div className="settings-row-sub">Show a countdown after each set</div>
+              </div>
+              <button
+                className={`toggle-btn${appData.settings.restTimerEnabled ? ' active' : ''}`}
+                onClick={() => updateSettings('restTimerEnabled', !appData.settings.restTimerEnabled)}
+              >
+                {appData.settings.restTimerEnabled ? 'ON' : 'OFF'}
+              </button>
+            </div>
+
+            {appData.settings.restTimerEnabled && (
+              <>
+                <div className="settings-row">
+                  <div>
+                    <div className="settings-row-name">Arms &amp; Legs</div>
+                    <div className="settings-row-sub">Rest between strength sets</div>
+                  </div>
+                  <div className="rest-dur-control">
+                    <button
+                      className="increment-button"
+                      onClick={() => updateSettings('restTimerArmsLegs', Math.max(15, (appData.settings.restTimerArmsLegs || 90) - 15))}
+                    >−</button>
+                    <span className="rest-dur-val">{fmtSecs(appData.settings.restTimerArmsLegs || 90)}</span>
+                    <button
+                      className="increment-button"
+                      onClick={() => updateSettings('restTimerArmsLegs', Math.min(300, (appData.settings.restTimerArmsLegs || 90) + 15))}
+                    >+</button>
+                  </div>
+                </div>
+                <div className="settings-row" style={{ borderBottom: 'none' }}>
+                  <div>
+                    <div className="settings-row-name">Core &amp; Cardio</div>
+                    <div className="settings-row-sub">Rest between timed sets</div>
+                  </div>
+                  <div className="rest-dur-control">
+                    <button
+                      className="increment-button"
+                      onClick={() => updateSettings('restTimerCoreCardio', Math.max(15, (appData.settings.restTimerCoreCardio || 45) - 15))}
+                    >−</button>
+                    <span className="rest-dur-val">{fmtSecs(appData.settings.restTimerCoreCardio || 45)}</span>
+                    <button
+                      className="increment-button"
+                      onClick={() => updateSettings('restTimerCoreCardio', Math.min(300, (appData.settings.restTimerCoreCardio || 45) + 15))}
+                    >+</button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 

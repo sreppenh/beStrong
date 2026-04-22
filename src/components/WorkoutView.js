@@ -104,7 +104,7 @@ const SetEntryModal = ({
     setTimeout(() => {
       const d = durationRef.current;
       if (isCardioRef.current) {
-        saveRef.current(null, null, d);
+        saveRef.current(null, null, d, undefined, true); // skipRestTimer for timer-based cardio
       } else {
         setTimerDone(true);
         setCurrentReps(Math.round(d / 3));
@@ -330,7 +330,8 @@ const WorkoutView = ({
   setView, finishWorkout, hasActiveSets, appData, addCustomExercise,
   repsEntry, setRepsEntry, saveSetWithData,
   abandonConfirmation, setAbandonConfirmation, confirmAbandonWorkout,
-  onStartWorkout, timerDisplay, isPaused, togglePause
+  onStartWorkout, timerDisplay, isPaused, togglePause,
+  restTimer, dismissRestTimer
 }) => {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [showAddExercise,      setShowAddExercise]      = useState(false);
@@ -411,7 +412,7 @@ const WorkoutView = ({
 
       {isPaused && <div className="paused-banner">WORKOUT PAUSED</div>}
 
-      <div className="app-content">
+      <div className="app-content" style={restTimer?.active ? { paddingBottom: 72 } : undefined}>
         {/* Selected category chips */}
         {activeCategories.length > 0 && (
           <div className="category-chips-row">
@@ -507,6 +508,26 @@ const WorkoutView = ({
           }}>ABANDON WORKOUT</button>
         </div>
       </div>
+
+      {/* Rest timer bar */}
+      {restTimer?.active && (() => {
+        const catMeta = WORKOUT_CATEGORIES.find(c => c.label === restTimer.category);
+        const barColor = catMeta?.color || 'var(--lime)';
+        const pct = restTimer.total > 0 ? (restTimer.remaining / restTimer.total) * 100 : 0;
+        return (
+          <div className="rest-timer-bar">
+            <div className="rest-timer-fill" style={{ width: `${pct}%`, background: barColor }} />
+            <div className="rest-timer-content">
+              <span className="rest-timer-icon">💤</span>
+              <span className="rest-timer-label">REST</span>
+              <span className={`rest-timer-time${restTimer.remaining <= 10 ? ' warn' : ''}`}>
+                {fmtTime(restTimer.remaining)}
+              </span>
+              <button className="rest-timer-skip" onClick={dismissRestTimer}>SKIP</button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Set entry modal */}
       {repsEntry && (
