@@ -447,6 +447,47 @@ body {
 .add-ex-cat-chip.active { font-weight: 700; }
 .add-ex-error { font-size: 12px; color: var(--danger); margin-bottom: 10px; }
 
+/* ── Weight flag buttons ── */
+.weight-flag-btn {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1.5px solid var(--surface3);
+  background: var(--surface3);
+  color: var(--text2);
+  font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.weight-flag-btn.up.active {
+  background: #1E2A0E;
+  color: var(--lime);
+  border-color: var(--lime);
+}
+.weight-flag-btn.down.active {
+  background: #2A1A1A;
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ── Weight flag badge ── */
+.weight-flag-badge {
+  display: inline-block;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 3px;
+}
+.weight-flag-badge.up {
+  background: #1E2A0E;
+  color: var(--lime);
+}
+.weight-flag-badge.down {
+  background: #2A1A1A;
+  color: var(--danger);
+}
+
 /* ── MEASUREMENTS SCREEN ── */
 .measure-field {
   background: var(--surface2); border-radius: 10px;

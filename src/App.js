@@ -208,6 +208,18 @@ function App() {
     });
   };
 
+  const setWeightFlag = (exerciseName, direction) => {
+    setAppData(prev => {
+      const flags = { ...(prev.settings.weightFlags || {}) };
+      if (flags[exerciseName] === direction) {
+        delete flags[exerciseName];
+      } else {
+        flags[exerciseName] = direction;
+      }
+      return { ...prev, settings: { ...prev.settings, weightFlags: flags } };
+    });
+  };
+
   const saveSetWithData = (reps, weight, duration, note, skipRestTimer = false) => {
     if (!repsEntry) return;
     const { exercise } = repsEntry;
@@ -231,6 +243,15 @@ function App() {
         newData = [makeEntry(1)];
       }
       return { ...prev, [exercise]: newData };
+    });
+    // Clear weight flag for this exercise when a set is logged
+    setAppData(prev => {
+      const flags = { ...(prev.settings.weightFlags || {}) };
+      if (exercise in flags) {
+        delete flags[exercise];
+        return { ...prev, settings: { ...prev.settings, weightFlags: flags } };
+      }
+      return prev;
     });
     setRepsEntry(null);
     if (!skipRestTimer) {
@@ -257,12 +278,14 @@ function App() {
     const totalPaused = isPausedRef.current
       ? totalPausedMsRef.current + (Date.now() - (pausedAtRef.current || Date.now()))
       : totalPausedMsRef.current;
+    const weightFlags = appData.settings.weightFlags || {};
     const newWorkout = {
       date: new Date().toISOString().split('T')[0],
       startTime: currentWorkout.startTime || new Date().toISOString(),
       exercises: Object.fromEntries(Object.entries(currentWorkout).filter(([k]) => !WORKOUT_RESERVED_KEYS.has(k))),
       ...(currentWorkout.categories?.length > 0 && { categories: currentWorkout.categories }),
       ...(totalPaused > 0 && { pausedDuration: totalPaused }),
+      ...(Object.keys(weightFlags).length > 0 && { weightFlags }),
     };
     setAppData(prev => ({ ...prev, workouts: [...prev.workouts, newWorkout] }));
     setCurrentWorkout({});
@@ -426,6 +449,7 @@ function App() {
     onStartWorkout: handleStartWorkout, timerDisplay,
     isPaused, togglePause,
     restTimer, dismissRestTimer,
+    weightFlags: appData.settings.weightFlags || {}, setWeightFlag,
     setView
   };
 

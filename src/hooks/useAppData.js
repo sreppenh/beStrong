@@ -37,7 +37,8 @@ export const useAppData = () => {
       exerciseOrder: {},
       restTimerEnabled: true,
       restTimerArmsLegs: 90,
-      restTimerCoreCardio: 45
+      restTimerCoreCardio: 45,
+      weightFlags: {}
     }
   });
 

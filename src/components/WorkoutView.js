@@ -331,7 +331,8 @@ const WorkoutView = ({
   repsEntry, setRepsEntry, saveSetWithData,
   abandonConfirmation, setAbandonConfirmation, confirmAbandonWorkout,
   onStartWorkout, timerDisplay, isPaused, togglePause,
-  restTimer, dismissRestTimer
+  restTimer, dismissRestTimer,
+  weightFlags, setWeightFlag
 }) => {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [showAddExercise,      setShowAddExercise]      = useState(false);
@@ -464,12 +465,31 @@ const WorkoutView = ({
                   {MUSCLE_GROUP_LABELS[m] || m}
                 </div>
                 <div className="exercise-name">{ex}</div>
+                {weightFlags[ex] && (
+                  <div className={`weight-flag-badge ${weightFlags[ex]}`}>
+                    {weightFlags[ex] === 'up' ? '↑ increase weight' : '↓ reduce weight'}
+                  </div>
+                )}
                 <div className="exercise-meta">
                   {sets > 0 ? `${sets} sets · ` : ''}
                   {lastDisplay ? `last: ${lastDisplay}` : 'no history yet'}
                 </div>
               </div>
               <div className="exercise-controls">
+                {sets > 0 && (
+                  <>
+                    <button
+                      className={`weight-flag-btn up${weightFlags[ex] === 'up' ? ' active' : ''}`}
+                      onClick={() => setWeightFlag(ex, 'up')}
+                      title="Flag: increase weight next session"
+                    >↑</button>
+                    <button
+                      className={`weight-flag-btn down${weightFlags[ex] === 'down' ? ' active' : ''}`}
+                      onClick={() => setWeightFlag(ex, 'down')}
+                      title="Flag: reduce weight next session"
+                    >↓</button>
+                  </>
+                )}
                 {sets > 0 && (
                   <button className="round-btn minus" onClick={() => decrementSet(ex)}>−</button>
                 )}
