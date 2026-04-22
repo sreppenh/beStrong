@@ -13,6 +13,11 @@ import './App.css';
 
 const MUSCLE_GROUPS = Object.keys(exerciseLibrary);
 
+const getLocalDateString = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+};
+
 function App() {
   const { appData, setAppData, saveData } = useAppData();
   const [currentWorkout, setCurrentWorkout] = useState({});
@@ -280,7 +285,7 @@ function App() {
       : totalPausedMsRef.current;
     const weightFlags = appData.settings.weightFlags || {};
     const newWorkout = {
-      date: new Date().toISOString().split('T')[0],
+      date: getLocalDateString(),
       startTime: currentWorkout.startTime || new Date().toISOString(),
       exercises: Object.fromEntries(Object.entries(currentWorkout).filter(([k]) => !WORKOUT_RESERVED_KEYS.has(k))),
       ...(currentWorkout.categories?.length > 0 && { categories: currentWorkout.categories }),

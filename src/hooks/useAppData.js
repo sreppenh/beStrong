@@ -9,6 +9,18 @@ const mergeAbsIntoCore = (obj) => {
   return merged.length > 0 ? { ...rest, core: merged } : rest;
 };
 
+const migrateWorkoutDates = (workouts) => {
+  return workouts.map(workout => {
+    if (!workout.startTime) return workout;
+    const startDate = new Date(workout.startTime);
+    const localDate = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+    if (workout.date !== localDate) {
+      return { ...workout, date: localDate };
+    }
+    return workout;
+  });
+};
+
 const migrateAbsToCore = (data) => {
   if (!data?.settings) return data;
   return {
@@ -49,6 +61,7 @@ export const useAppData = () => {
         let parsed = JSON.parse(saved);
         if (!parsed.measurements) parsed.measurements = [];
         parsed = migrateAbsToCore(parsed);
+        parsed.workouts = migrateWorkoutDates(parsed.workouts || []);
         setAppData(parsed);
       }
     } catch (e) {

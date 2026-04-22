@@ -6,6 +6,9 @@ import WorkoutTypeSelectorModal, { WORKOUT_CATEGORIES } from './WorkoutTypeSelec
 
 const MUSCLE_GROUPS = Object.keys(exerciseLibrary);
 
+const toLocalDateStr = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorkout, setEditMeasurementIdx, setEditWorkoutIdx, onStartWorkout }) => {
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
@@ -26,6 +29,7 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
 
   const getRecentWorkouts = () => {
     const sevenDaysAgo = new Date();
+    sevenDaysAgo.setHours(0, 0, 0, 0);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     return [...appData.workouts]
       .filter(w => new Date(w.startTime || w.date) >= sevenDaysAgo)
@@ -127,8 +131,8 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
           {Array.from({ length: 7 }, (_, i) => {
             const d = new Date(now);
             d.setDate(d.getDate() - (6 - i));
-            const dStr = d.toISOString().split('T')[0];
-            const has = appData.workouts.some(w => (w.startTime || w.date || '').startsWith(dStr));
+            const dStr = toLocalDateStr(d);
+            const has = appData.workouts.some(w => w.date === dStr);
             return (
               <div key={i} className={`streak-dot${has ? ' done' : ''}`}>
                 {['S','M','T','W','T','F','S'][d.getDay()]}
@@ -151,10 +155,10 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
           for (let i = 0; i < 7; i++) {
             const d = new Date(now);
             d.setDate(d.getDate() - (6 - i));
-            dayMuscles[d.toISOString().split('T')[0]] = new Set();
+            dayMuscles[toLocalDateStr(d)] = new Set();
           }
           appData.workouts.forEach(w => {
-            const dStr = (w.startTime || w.date || '').split('T')[0];
+            const dStr = w.date || '';
             if (!dayMuscles[dStr]) return;
             Object.keys(w.exercises || {}).forEach(ex => {
               let muscle = MUSCLE_GROUPS.find(m => exerciseLibrary[m].includes(ex));
@@ -166,7 +170,7 @@ const HomeView = ({ appData, setView, muscleGroups, capitalizeFirst, deleteWorko
           const days = Array.from({ length: 7 }, (_, i) => {
             const d = new Date(now);
             d.setDate(d.getDate() - (6 - i));
-            return { dStr: d.toISOString().split('T')[0], day: d.getDay(), daysAgo: 6 - i };
+            return { dStr: toLocalDateStr(d), day: d.getDay(), daysAgo: 6 - i };
           });
 
           return (
