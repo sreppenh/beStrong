@@ -162,7 +162,7 @@ function App() {
     });
   };
 
-  const saveSetWithData = (reps, weight, duration) => {
+  const saveSetWithData = (reps, weight, duration, note) => {
     if (!repsEntry) return;
     const { exercise } = repsEntry;
     const makeEntry = (setNum) => {
@@ -170,6 +170,7 @@ function App() {
       if (reps != null) entry.reps = reps;
       if (weight != null) entry.weight = weight;
       if (duration != null) entry.duration = duration;
+      if (note) entry.note = note;
       return entry;
     };
     setCurrentWorkout(prev => {

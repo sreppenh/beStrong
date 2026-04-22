@@ -20,6 +20,10 @@ const SetEntryModal = ({
   const defaultDur = isCardio ? 300 : 60;
   const durStep    = isCardio ? 15  : 5;
 
+  // cardio: default to manual; core: timer only
+  const [cardioMode,    setCardioMode]    = useState('manual'); // 'manual' | 'timer'
+  const [manualDur,     setManualDur]     = useState(1800);     // manual cardio duration (s), default 30min
+  const [note,          setNote]          = useState('');
   const [duration,      setDuration]      = useState(defaultDur);
   const [timeLeft,      setTimeLeft]      = useState(defaultDur);
   // timerPhase: 'idle' | 'countdown' | 'running' | 'finishing'
@@ -160,6 +164,10 @@ const SetEntryModal = ({
     setRepsEntry(null);
   };
 
+  const handleManualSave = () => {
+    saveSetWithData(null, null, manualDur, note.trim() || undefined);
+  };
+
   const handleSave = () => {
     if (isCardio) {
       saveSetWithData(null, null, duration);
@@ -176,10 +184,56 @@ const SetEntryModal = ({
         <div className="modal-title">{repsEntry.exercise}</div>
         <div className="modal-subtitle">{capitalizeFirst(muscle)}</div>
 
-        {/* ── Timer section ── */}
-        {hasTimer && (
+        {/* ── Cardio mode toggle ── */}
+        {isCardio && timerPhase === 'idle' && (
+          <div className="tab-bar" style={{ marginBottom: 16 }}>
+            <button
+              className={`tab-btn${cardioMode === 'manual' ? ' active' : ''}`}
+              onClick={() => setCardioMode('manual')}
+            >
+              LOG MANUALLY
+            </button>
+            <button
+              className={`tab-btn${cardioMode === 'timer' ? ' active' : ''}`}
+              onClick={() => setCardioMode('timer')}
+            >
+              USE TIMER
+            </button>
+          </div>
+        )}
+
+        {/* ── Cardio manual mode ── */}
+        {isCardio && cardioMode === 'manual' && timerPhase === 'idle' && (
+          <>
+            <div className="modal-label" style={{ marginBottom: 8 }}>DURATION</div>
+            <div className="modal-val-row">
+              <button className="modal-ctrl-btn minus" onClick={() => setManualDur(d => Math.max(60, d - 60))}>−</button>
+              <div className="modal-val">{fmtTime(manualDur)}</div>
+              <button className="modal-ctrl-btn plus" onClick={() => setManualDur(d => d + 60)}>+</button>
+            </div>
+
+            <div className="modal-divider" />
+
+            <div className="modal-label" style={{ marginBottom: 8 }}>NOTES <span style={{ color: 'var(--text2)', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span></div>
+            <input
+              className="add-ex-input"
+              style={{ marginBottom: 0 }}
+              placeholder="e.g. outdoor walk, slight incline"
+              value={note}
+              onChange={e => setNote(e.target.value)}
+            />
+
+            <div className="modal-actions">
+              <button className="primary-button" onClick={handleManualSave}>SAVE SET</button>
+              <button className="secondary-button" onClick={handleModalClose}>CANCEL</button>
+            </div>
+          </>
+        )}
+
+        {/* ── Timer section (core always; cardio when timer mode) ── */}
+        {hasTimer && (!isCardio || cardioMode === 'timer') && (
           <div className="timer-section">
-            <div className="modal-label" style={{ marginBottom: 8 }}>TIMER</div>
+            {!isCardio && <div className="modal-label" style={{ marginBottom: 8 }}>TIMER</div>}
 
             {/* Idle: duration picker + start button */}
             {timerPhase === 'idle' && (
@@ -223,7 +277,7 @@ const SetEntryModal = ({
           </div>
         )}
 
-        {/* ── Reps / Weight (not cardio, only when idle) ── */}
+        {/* ── Reps / Weight (core only, when idle) ── */}
         {!isCardio && timerPhase === 'idle' && (
           <>
             {hasTimer && <div className="modal-divider" />}
@@ -246,10 +300,17 @@ const SetEntryModal = ({
           </>
         )}
 
-        {/* ── Actions (idle only) ── */}
-        {timerPhase === 'idle' && (
+        {/* ── Actions for non-cardio (idle only) ── */}
+        {!isCardio && timerPhase === 'idle' && (
           <div className="modal-actions">
             <button className="primary-button" onClick={handleSave}>SAVE SET</button>
+            <button className="secondary-button" onClick={handleModalClose}>CANCEL</button>
+          </div>
+        )}
+
+        {/* ── Cancel for cardio timer mode when idle ── */}
+        {isCardio && cardioMode === 'timer' && timerPhase === 'idle' && (
+          <div className="modal-actions">
             <button className="secondary-button" onClick={handleModalClose}>CANCEL</button>
           </div>
         )}
@@ -297,7 +358,9 @@ const WorkoutView = ({
     const d = wk[ex];
     if (!Array.isArray(d) || !d.length) return null;
     const last = d[d.length - 1];
-    if (last.duration != null) return fmtTime(last.duration);
+    if (last.duration != null) {
+      return last.note ? `${fmtTime(last.duration)} · ${last.note}` : fmtTime(last.duration);
+    }
     return `${last.weight}lbs × ${last.reps}`;
   };
 
