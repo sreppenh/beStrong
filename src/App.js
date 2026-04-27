@@ -33,6 +33,7 @@ function App() {
   const [timerDisplay, setTimerDisplay] = useState('00:00');
   const [workoutStart, setWorkoutStart] = useState(null);
   const [restTimer, setRestTimer] = useState({ active: false, remaining: 0, total: 0, category: null, endsAt: null });
+  const restTimerEndsAtRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef      = useRef(false);
   const pausedAtRef      = useRef(null);   // timestamp when last paused
@@ -153,6 +154,7 @@ function App() {
   };
 
   const dismissRestTimer = () => {
+    restTimerEndsAtRef.current = null;
     setRestTimer({ active: false, remaining: 0, total: 0, category: null, endsAt: null });
   };
 
@@ -163,14 +165,18 @@ function App() {
     const duration = isArmsLegs
       ? (appData.settings.restTimerArmsLegs || 90)
       : (appData.settings.restTimerCoreCardio || 45);
-    setRestTimer({ active: true, remaining: duration, total: duration, category, endsAt: Date.now() + duration * 1000 });
+    const endsAt = Date.now() + duration * 1000;
+    restTimerEndsAtRef.current = endsAt;
+    setRestTimer({ active: true, remaining: duration, total: duration, category, endsAt });
   };
 
   useEffect(() => {
     if (!restTimer.active || !restTimer.endsAt) return;
 
-    const tick = () => {
-      const remaining = Math.max(0, Math.round((restTimer.endsAt - Date.now()) / 1000));
+    const recalculate = () => {
+      const endsAt = restTimerEndsAtRef.current;
+      if (!endsAt) return;
+      const remaining = Math.max(0, Math.round((endsAt - Date.now()) / 1000));
       if (remaining === 0) {
         fireRestTimerAlarm();
         setRestTimer(prev => ({ ...prev, active: false, remaining: 0 }));
@@ -179,25 +185,21 @@ function App() {
       }
     };
 
-    const intervalId = setInterval(tick, 1000);
+    const intervalId = setInterval(recalculate, 1000);
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && restTimer.active) {
-        const remaining = Math.max(0, Math.round((restTimer.endsAt - Date.now()) / 1000));
-        if (remaining === 0) {
-          fireRestTimerAlarm();
-          setRestTimer(prev => ({ ...prev, active: false, remaining: 0 }));
-        } else {
-          setRestTimer(prev => ({ ...prev, remaining }));
-        }
-      }
+      if (document.visibilityState === 'visible') recalculate();
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', recalculate);
+    window.addEventListener('pageshow', recalculate);
 
     return () => {
       clearInterval(intervalId);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', recalculate);
+      window.removeEventListener('pageshow', recalculate);
     };
   }, [restTimer.active, restTimer.endsAt]);
 
