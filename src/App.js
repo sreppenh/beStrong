@@ -32,8 +32,7 @@ function App() {
   });
   const [timerDisplay, setTimerDisplay] = useState('00:00');
   const [workoutStart, setWorkoutStart] = useState(null);
-  const [restTimer, setRestTimer] = useState({ active: false, remaining: 0, total: 0, category: null });
-  const restTimerIntervalRef = useRef(null);
+  const [restTimer, setRestTimer] = useState({ active: false, remaining: 0, total: 0, category: null, endsAt: null });
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef      = useRef(false);
   const pausedAtRef      = useRef(null);   // timestamp when last paused
@@ -135,9 +134,26 @@ function App() {
   };
 
   // ── Actions ──────────────────────────────────────────────
+  const fireRestTimerAlarm = () => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const beep = (when) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 660;
+        gain.gain.setValueAtTime(0.2, ctx.currentTime + when);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + when + 0.15);
+        osc.start(ctx.currentTime + when);
+        osc.stop(ctx.currentTime + when + 0.15);
+      };
+      beep(0); beep(0.35);
+    } catch (e) {}
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+  };
+
   const dismissRestTimer = () => {
-    clearInterval(restTimerIntervalRef.current);
-    setRestTimer({ active: false, remaining: 0, total: 0, category: null });
+    setRestTimer({ active: false, remaining: 0, total: 0, category: null, endsAt: null });
   };
 
   const startRestTimer = (muscle) => {
@@ -147,36 +163,43 @@ function App() {
     const duration = isArmsLegs
       ? (appData.settings.restTimerArmsLegs || 90)
       : (appData.settings.restTimerCoreCardio || 45);
-    clearInterval(restTimerIntervalRef.current);
-    setRestTimer({ active: true, remaining: duration, total: duration, category });
-    restTimerIntervalRef.current = setInterval(() => {
-      setRestTimer(prev => {
-        if (!prev.active) { clearInterval(restTimerIntervalRef.current); return prev; }
-        const next = prev.remaining - 1;
-        if (next <= 0) {
-          clearInterval(restTimerIntervalRef.current);
-          // Soft 2-beep finish
-          try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const beep = (when) => {
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-              osc.connect(gain); gain.connect(ctx.destination);
-              osc.frequency.value = 660;
-              gain.gain.setValueAtTime(0.2, ctx.currentTime + when);
-              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + when + 0.15);
-              osc.start(ctx.currentTime + when);
-              osc.stop(ctx.currentTime + when + 0.15);
-            };
-            beep(0); beep(0.35);
-          } catch (e) {}
-          if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-          return { ...prev, active: false, remaining: 0 };
-        }
-        return { ...prev, remaining: next };
-      });
-    }, 1000);
+    setRestTimer({ active: true, remaining: duration, total: duration, category, endsAt: Date.now() + duration * 1000 });
   };
+
+  useEffect(() => {
+    if (!restTimer.active || !restTimer.endsAt) return;
+
+    const tick = () => {
+      const remaining = Math.max(0, Math.round((restTimer.endsAt - Date.now()) / 1000));
+      if (remaining === 0) {
+        fireRestTimerAlarm();
+        setRestTimer(prev => ({ ...prev, active: false, remaining: 0 }));
+      } else {
+        setRestTimer(prev => ({ ...prev, remaining }));
+      }
+    };
+
+    const intervalId = setInterval(tick, 1000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && restTimer.active) {
+        const remaining = Math.max(0, Math.round((restTimer.endsAt - Date.now()) / 1000));
+        if (remaining === 0) {
+          fireRestTimerAlarm();
+          setRestTimer(prev => ({ ...prev, active: false, remaining: 0 }));
+        } else {
+          setRestTimer(prev => ({ ...prev, remaining }));
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [restTimer.active, restTimer.endsAt]);
 
   const resetPauseState = () => {
     setIsPaused(false);
