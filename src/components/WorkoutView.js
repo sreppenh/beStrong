@@ -357,13 +357,27 @@ const WorkoutView = ({
   };
 
   const getLastDisplay = (ex) => {
-    const d = wk[ex];
-    if (!Array.isArray(d) || !d.length) return null;
-    const last = d[d.length - 1];
-    if (last.duration != null) {
-      return last.note ? `${fmtTime(last.duration)} · ${last.note}` : fmtTime(last.duration);
+    // Current session first
+    const cur = wk[ex];
+    if (Array.isArray(cur) && cur.length) {
+      const last = cur[cur.length - 1];
+      if (last.duration != null) {
+        return last.note ? `${fmtTime(last.duration)} · ${last.note}` : fmtTime(last.duration);
+      }
+      return `${last.weight}lbs × ${last.reps}`;
     }
-    return `${last.weight}lbs × ${last.reps}`;
+    // Fall back to most recent historical workout
+    for (let i = appData.workouts.length - 1; i >= 0; i--) {
+      const d = appData.workouts[i].exercises?.[ex];
+      if (Array.isArray(d) && d.length) {
+        const last = d[d.length - 1];
+        if (last.duration != null) {
+          return last.note ? `${fmtTime(last.duration)} · ${last.note}` : fmtTime(last.duration);
+        }
+        if (last.weight != null) return `${last.weight}lbs × ${last.reps}`;
+      }
+    }
+    return null;
   };
 
   const handleAddExercise = () => {
