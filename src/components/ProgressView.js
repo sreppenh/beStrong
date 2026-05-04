@@ -86,14 +86,18 @@ const BodyTab = ({ appData }) => {
       <p>Log at least 2 check-ins to see body trends.</p>
     </div>
   );
-  const first = meas[0], last = meas[meas.length - 1];
   const recent8 = meas.slice(-8);
   const labels = recent8.map(m => new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
 
   return (
     <div>
       {MEASURES.map(m => {
-        if (first[m.key] == null || last[m.key] == null) return null;
+        // Use the earliest and most recent check-ins that actually have this measurement,
+        // so a missing value in the very first check-in doesn't hide all future progress.
+        const withData = meas.filter(entry => entry[m.key] != null);
+        if (withData.length < 2) return null;
+        const first = withData[0];
+        const last  = withData[withData.length - 1];
         const delta = last[m.key] - first[m.key];
         const sign = delta >= 0 ? '+' : '';
         const good = (m.key === 'weight' || m.key === 'bodyFat') ? delta <= 0 : false;
